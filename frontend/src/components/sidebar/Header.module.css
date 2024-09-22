@@ -1,0 +1,7 @@
+.sideBarHeader:hover {
+    background-color: lightslategrey;
+}
+
+.selectedHeader{
+    background-color: black;
+}

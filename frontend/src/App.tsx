@@ -1,10 +1,13 @@
 import './App.css'
-import SideBar from "./components/SideBar.tsx";
+import SideBar from "./components/sidebar/SideBar.tsx";
 
 function App() {
     return (
         <>
-            <SideBar></SideBar>
+            <div className="body">
+
+                <SideBar></SideBar>
+            </div>
         </>
     )
 }
