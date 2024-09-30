@@ -4,7 +4,7 @@ function SideBar(){
     return (
         //Here will land the selection for the algorithms
         <>
-            <Header headerName={"Sorting algorithms"} algoOptions={["Selection Sort", "Bubble Sort"]}></Header>
+            <Header headerName={"Sorting algorithms"} algoOptions={[{id: 1, value: "Selection Sort"}, {id:2, value: "Bubble Sort"}]}></Header>
         </>
     )
 }

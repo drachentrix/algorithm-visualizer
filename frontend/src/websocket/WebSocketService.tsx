@@ -8,7 +8,7 @@ function WebSocketService(){
     var stomp: CompatClient;
 
     useEffect( () => {
-            socket = new SockJS("http://localhost:8080");
+            socket = new SockJS("ws://localhost:8080");
             connect()
             return () => {disconnect()}
         }
@@ -31,4 +31,3 @@ function WebSocketService(){
 }
 
 
-export default WebSocketService

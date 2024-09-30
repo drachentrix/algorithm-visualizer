@@ -1,3 +1,8 @@
 body{
   justify-content: start;
 }
+
+.contentBody{
+  display: flex;
+}
+

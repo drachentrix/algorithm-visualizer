@@ -1,0 +1,27 @@
+.displayField {
+    grid-row: span 2 / span 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.Item{
+    border: 1px solid black;
+    padding: 5px;
+}
+
+.isActive {
+    color: black;
+}
+
+.inputField{
+    grid-column-start: 2;
+}
+
+.baseGrid {
+    display: grid;
+    justify-content: center;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 8px;
+}

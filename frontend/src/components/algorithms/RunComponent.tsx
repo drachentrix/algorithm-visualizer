@@ -1,13 +1,11 @@
 import {FaArrowLeftLong, FaArrowRight} from "react-icons/fa6";
 import {RxTriangleRight} from "react-icons/rx";
-import WebSocketService from "../../websocket/WebSocketService.tsx";
 import React from "react";
 
 let started: boolean = false;
 function RunComponent(props: { maxStep: number, currentStep: number, setCurrentStep: React.Dispatch<React.SetStateAction<number>> }){
 
     const startAlgorithm = () => {
-        WebSocketService()
         started = true;
     }
 
@@ -29,8 +27,6 @@ function RunComponent(props: { maxStep: number, currentStep: number, setCurrentS
             <RxTriangleRight onClick={startAlgorithm}/>
         </>
     )
-
-
 }
 
 
