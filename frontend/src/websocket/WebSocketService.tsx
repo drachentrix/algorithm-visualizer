@@ -1,33 +1,65 @@
 import {useEffect} from "react";
-import {CompatClient, Stomp} from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 
+function WebSocketService(props: {
+    id: string,
+    algorithmTypeId: string,
+    isConnected: boolean,
+    onDisconnect: () => void,
+    incrementMaxStep: () => void,
+    items: number[],
+    addStep: (item: String) => void
+})
+{
+    let socket: WebSocket;
 
-function WebSocketService(){
-    var socket: WebSocket;
-    var stomp: CompatClient;
-
-    useEffect( () => {
-            socket = new SockJS("ws://localhost:8080");
-            connect()
-            return () => {disconnect()}
+    const sendMessage = (message: string) => {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(message));
+            console.log("Sent message:", message);
         }
-    )
+    }
+    const connect = () => {
 
-     const connect = () => {
-        stomp = Stomp.over(socket)
-        stomp?.connect({}, () => {
-            stomp?.subscribe('algorithm/receive', () => {})
+        socket.onopen = () => {
+            console.log("Connected to WebSocket");
+            const message = JSON.stringify({id: props.id, algorithmType: props.algorithmTypeId, items: props.items});
+            sendMessage(message)
+        };
 
-            stomp.subscribe('algorithm/reply', (message) => {
-                console.log(message)
-            })
-        })
+        socket.onmessage = (event) => {
+            if (event.data.split(":")[0] != event.data.split(":")[1]){
+                props.incrementMaxStep()
+                props.addStep(event.data)
+                console.log("Received message:", event.data);
+            }
+        };
+
+        socket.onclose = () => {
+            console.log("Disconnected from WebSocket");
+            props.onDisconnect();
+        };
+
+        socket.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+
+        return () => {
+            console.log("Closing WebSocket connection");
+            socket.close();
+            props.onDisconnect();
+        };
     }
 
-    const disconnect = () => {
-        stomp.disconnect()
-    }
+
+    useEffect(() => {
+        if (props.isConnected) {
+            socket = new WebSocket("ws://localhost:8080/algorithm");
+            connect()
+        }
+    }, [props.isConnected, props.id, props.algorithmTypeId]);
+
+    return null;
 }
 
 
+export default WebSocketService;

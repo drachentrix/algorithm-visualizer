@@ -11,13 +11,13 @@ function Header(props: { headerName: string; algoOptions: { id: number, value: s
     const location = useLocation();
 
     const isActive = (id: number) => {
-        return location.pathname === `/algorithm/sorting/${id}`;
+        return location.pathname === `/algorithm/${props.headerName.trim()}/${id}`;
     }
 
     const listItems = props.algoOptions
         .map(algoOption =>
             <li className={isActive(algoOption.id) ? styles.isActive : ''}>
-                <Link to={"/algorithm/sorting/" + algoOption.id}
+                <Link to={"/algorithm/" + props.headerName.replace(" ", "") + "/" + algoOption.id}
                       className={styles.sideBarHeader}>{algoOption.value}</Link>
             </li>)
 

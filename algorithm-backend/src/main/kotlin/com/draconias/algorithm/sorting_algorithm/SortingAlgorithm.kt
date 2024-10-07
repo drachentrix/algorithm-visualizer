@@ -1,6 +1,5 @@
 package com.draconias.algorithm.sorting_algorithm
 
-interface SortingAlgorithm {
-
+interface SortingAlgorithm{
     suspend fun sort(items: MutableList<Int>)
 }

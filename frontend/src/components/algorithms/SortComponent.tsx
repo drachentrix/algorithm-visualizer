@@ -1,13 +1,12 @@
 import RunComponent from "./RunComponent.tsx";
-import React, {useState, useEffect} from "react";
-import styles from "./SortComponent.module.css"
-import {useParams, useLocation} from "react-router-dom"
+import React, { useState, useEffect } from "react";
+import styles from "./SortComponent.module.css";
+import { useParams, useLocation } from "react-router-dom";
 
-function SortComponent(){
-    const [items, setItems] = useState<number[]>([]);
+function SortComponent() {
     const [currentValue, setCurrentValue] = useState<number>(0);
-    const [currentStep, setCurrentStep] = useState(0);
-    const {id} = useParams();
+    const [items, setItems] = useState<number[]>([]);
+    const { id } = useParams();
     const location = useLocation();
 
     useEffect(() => {
@@ -16,25 +15,40 @@ function SortComponent(){
 
     const handleKeyDown = () => {
         setItems(prevItems => [...prevItems, currentValue]);
-        setCurrentValue(0)
-    }
+        setCurrentValue(0);
+    };
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCurrentValue(Number(event.target.value));
     };
+
+    const removeItemFromList = (index: number) => {
+        setItems(items.filter((_, ind) => index !== ind));
+    }
+
     return (
         <div className={styles.baseGrid}>
             <div className={styles.displayField}>
-                {items.map((item) => (<div className={styles.Item}>{item}</div>))}
+                {items.map((item, index) => (
+                    <div key={index} className={styles.Item} onClick={() => removeItemFromList(index)}>{item}</div>
+                ))}
             </div>
-            <RunComponent currentStep={currentStep} setCurrentStep={setCurrentStep} maxStep={items.length}></RunComponent>
+
+            <RunComponent
+                id={id!}
+                algorithmTypeId={"1"}
+                items={items}
+                setUpdatedItems={setItems}
+            />
+
             <div className={styles.inputField}>
-                <input value={currentValue} type={"number"} onChange={handleChange}/>
+                <input value={currentValue} type={"number"} onChange={handleChange} />
                 <button onClick={handleKeyDown}>Add item</button>
             </div>
+
             <div className={"Replies"}></div>
         </div>
-    )
+    );
 }
 
-export default SortComponent
+export default SortComponent;

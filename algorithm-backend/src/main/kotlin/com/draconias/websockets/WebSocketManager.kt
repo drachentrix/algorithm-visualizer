@@ -9,9 +9,16 @@ object WebSocketManager {
     }
 
     suspend fun sendMessageToSession(message: String) {
-        WebSocketSessionContext.sessionId.send(Frame.Text(message))
+        val indexOfSemicolon = message.indexOf(";")
+        var modifiedMessage = message;
+        if (indexOfSemicolon != -1){
+            modifiedMessage = message.substring(0, message.indexOf(";"))
+        }
+        WebSocketSessionContext.sessionId.send(Frame.Text(modifiedMessage))
         if (message.contains(";FINISHED", ignoreCase = true)) {
+            WebSocketSessionContext.sessionId.close()
             removeSession()
+
         }
     }
 

@@ -11,7 +11,7 @@ function App() {
                     <div className="contentBody">
                         <SideBar></SideBar>
                         <Routes>
-                            <Route path={"algorithm/sorting/:id"} element={<SortComponent/>}/>
+                            <Route path={"algorithm/Sortingalgorithms/:id"} element={<SortComponent/>}/>
                         </Routes>
                     </div>
                 </Router>
