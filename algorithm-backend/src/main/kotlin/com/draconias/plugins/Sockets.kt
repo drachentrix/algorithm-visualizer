@@ -27,7 +27,7 @@ fun Application.configureSockets() {
         allowHeader("Content-Type")
     }
     routing {
-        webSocket("/algorithm") {
+        webSocket("/algorithm/sorting") {
             for (frame in incoming) {
                 when (frame) {
                     is Text -> {

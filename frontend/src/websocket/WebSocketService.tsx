@@ -8,8 +8,7 @@ function WebSocketService(props: {
     incrementMaxStep: () => void,
     items: number[],
     addStep: (item: String) => void
-})
-{
+}) {
     let socket: WebSocket;
 
     const sendMessage = (message: string) => {
@@ -22,21 +21,21 @@ function WebSocketService(props: {
 
         socket.onopen = () => {
             console.log("Connected to WebSocket");
+            props.addStep("CLEAR;!")
             const message = JSON.stringify({id: props.id, algorithmType: props.algorithmTypeId, items: props.items});
             sendMessage(message)
         };
 
         socket.onmessage = (event) => {
-            if (event.data.split(":")[0] != event.data.split(":")[1]){
-                props.incrementMaxStep()
-                props.addStep(event.data)
-                console.log("Received message:", event.data);
-            }
+            props.incrementMaxStep()
+            props.addStep(event.data)
+            console.log("Received message:", event.data);
         };
 
         socket.onclose = () => {
             console.log("Disconnected from WebSocket");
             props.onDisconnect();
+
         };
 
         socket.onerror = (error) => {
@@ -53,7 +52,7 @@ function WebSocketService(props: {
 
     useEffect(() => {
         if (props.isConnected) {
-            socket = new WebSocket("ws://localhost:8080/algorithm");
+            socket = new WebSocket("ws://localhost:8080/algorithm/sorting"); //todo Later change to dynamic link for the different types
             connect()
         }
     }, [props.isConnected, props.id, props.algorithmTypeId]);

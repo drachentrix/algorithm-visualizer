@@ -1,19 +1,20 @@
-package com.draconias.algorithm.sorting_algorithm
+package com.draconias.algorithm.sorting_algorithm.logic
 
+import com.draconias.algorithm.sorting_algorithm.SortingAlgorithm
 import com.draconias.websockets.WebSocketManager
 
-class SelectionSort: SortingAlgorithm{
+class SelectionSort : SortingAlgorithm {
 
     override suspend fun sort(items: MutableList<Int>) {
         for (i in items.indices) {
             val lowestIndex = findLowest(items.subList(i, items.size)) + i
-            items.swap(i, lowestIndex)
-            if (i == items.indices.last){
-                WebSocketManager.sendMessageToSession("$lowestIndex:$i;FINISHED")
-            } else {
+            if (i != lowestIndex) {
+                items.swap(i, lowestIndex)
                 WebSocketManager.sendMessageToSession("$lowestIndex:$i")
             }
         }
+        WebSocketManager.sendMessageToSession("FINISHED")
+
     }
 
     fun findLowest(items: List<Int>): Int {

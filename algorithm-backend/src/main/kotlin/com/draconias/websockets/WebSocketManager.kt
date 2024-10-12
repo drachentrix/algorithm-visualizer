@@ -1,24 +1,23 @@
 package com.draconias.websockets
 
 import io.ktor.websocket.*
+import org.slf4j.LoggerFactory
 
 object WebSocketManager {
+    private val logger = LoggerFactory.getLogger(WebSocketManager::class.java)
 
     fun addSession(session: WebSocketSession) {
         WebSocketSessionContext.sessionId = session
     }
 
     suspend fun sendMessageToSession(message: String) {
-        val indexOfSemicolon = message.indexOf(";")
-        var modifiedMessage = message;
-        if (indexOfSemicolon != -1){
-            modifiedMessage = message.substring(0, message.indexOf(";"))
-        }
-        WebSocketSessionContext.sessionId.send(Frame.Text(modifiedMessage))
-        if (message.contains(";FINISHED", ignoreCase = true)) {
+        if (message != "FINISHED") {
+            logger.info("Send Message to client: $message")
+            WebSocketSessionContext.sessionId.send(Frame.Text(message))
+        } else {
+            logger.info("Send all Messages to client! Connection gets closed")
             WebSocketSessionContext.sessionId.close()
             removeSession()
-
         }
     }
 

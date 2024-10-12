@@ -1,21 +1,28 @@
 import {FaArrowLeftLong, FaArrowRight} from "react-icons/fa6";
 import {RxTriangleRight} from "react-icons/rx";
 import React, {useState, useEffect} from "react";
+import { RiDeleteBin5Line } from "react-icons/ri";
 import WebSocketService from "../../websocket/WebSocketService.tsx";
+import styles from "./RunComponent.module.css";
 
 function RunComponent(props: {
     id: string,
     algorithmTypeId: string,
     items: number[],
-    setUpdatedItems: React.Dispatch<React.SetStateAction<number[]>>
+    setItems: React.Dispatch<React.SetStateAction<number[]>>
 }) {
     const [isConnected, setIsConnected] = useState(false);
     const [maxStep, setMaxSteps] = useState<number>(0);
     const [currentStep, setCurrentStep] = useState(0);
     const [takenSteps, setTakenSteps] = useState<String[]>([]);
+    const [originalList, setOriginalList] = useState<number[]>([])
 
     const addStep = (item: String) => {
-        setTakenSteps((prev) => [...prev, item]);
+        if (item == "CLEAR;!"){
+            setTakenSteps([])
+        }else {
+            setTakenSteps((prev) => [...prev, item]);
+        }
     }
     const incrementMaxSteps = () => {
         setMaxSteps((prev) => prev + 1);
@@ -27,25 +34,27 @@ function RunComponent(props: {
     const startAlgorithm = () => {
         setCurrentStep(0)
         setMaxSteps(0)
-        props.setUpdatedItems([])
+        setOriginalList(props.items)
         setIsConnected(true)
     }
 
     const applyStepsToList = () => {
-        let modifiedItems = [...props.items];
+        let modifiedItems = [...originalList];
+
+        if (currentStep === 0) {
+            return originalList;
+        }
 
         for (let i = 0; i < currentStep; i++) {
             const step = takenSteps[i];
             const [fromIndex, toIndex] = step.split(":").map(Number);
-
-            if (fromIndex >= 0 && fromIndex < modifiedItems.length && toIndex >= 0 && toIndex < modifiedItems.length) {
-                const [item] = modifiedItems.splice(fromIndex, 1);
-                modifiedItems.splice(toIndex, 0, item);
-            }
+            const temp = modifiedItems[fromIndex];
+            modifiedItems[fromIndex] = modifiedItems[toIndex];
+            modifiedItems[toIndex] = temp;
         }
-
         return modifiedItems;
-    }
+    };
+
 
     const incrementCurrentStep = (value: number) => {
         let newStep = currentStep + value;
@@ -55,26 +64,53 @@ function RunComponent(props: {
         return undefined;
     }
 
+    const clearItems = () => {
+        setOriginalList([]);
+        props.setItems([])
+    }
+
     useEffect(() => {
-        props.setUpdatedItems(applyStepsToList());
+        props.setItems(applyStepsToList());
     }, [currentStep]);
 
     return (
         <>
-            <div className={"progressBar"}>
-                <FaArrowLeftLong onClick={() => incrementCurrentStep(-1)}/>
+            <div className={styles.progressBar}>
+                <FaArrowLeftLong
+                    onClick={() => incrementCurrentStep(-1)}
+                    title="Previous Step"
+                />
                 <div>{currentStep} : {maxStep}</div>
-                <FaArrowRight onClick={() => incrementCurrentStep(1)}/>
+                <FaArrowRight
+                    onClick={() => incrementCurrentStep(1)}
+                    title="Next Step"
+                />
+                <div className={styles.startButton}>
+                    <RxTriangleRight
+                        onClick={startAlgorithm}
+                        title="Start Algorithm"
+                    />
+                </div>
+                <div className={styles.clearButton}>
+                    <RiDeleteBin5Line
+                        onClick={clearItems}
+                        title="Clear items"
+                    />
+                </div>
             </div>
-            <RxTriangleRight onClick={startAlgorithm}/>
             {isConnected && (
-                <WebSocketService id={props.id} algorithmTypeId={props.algorithmTypeId} addStep={addStep}
-                                  items={props.items} isConnected={isConnected} onDisconnect={handleDisconnect}
-                                  incrementMaxStep={incrementMaxSteps}/>
+                <WebSocketService
+                    id={props.id}
+                    algorithmTypeId={props.algorithmTypeId}
+                    addStep={addStep}
+                    items={props.items}
+                    isConnected={isConnected}
+                    onDisconnect={handleDisconnect}
+                    incrementMaxStep={incrementMaxSteps}
+                />
             )}
         </>
     )
 }
 
-
-export default RunComponent
+export default RunComponent;

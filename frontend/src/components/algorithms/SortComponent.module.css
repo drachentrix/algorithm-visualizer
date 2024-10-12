@@ -1,27 +1,67 @@
-.displayField {
-    grid-row: span 2 / span 2;
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
-}
-
-.Item{
-    border: 1px solid black;
-    padding: 5px;
-}
-
-.isActive {
-    color: black;
-}
-
-.inputField{
-    grid-column-start: 2;
-}
-
 .baseGrid {
     display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid black;
+}
+
+.chartContainer {
+    border: 1px solid black;
+}
+
+.itemBoxes {
+    border: 1px solid black;
+}
+
+.itemList {
+    text-align: center;
+}
+
+.itemBoxContainer {
+    display: flex;
     justify-content: center;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px;
+}
+
+.itemBox {
+    border: 1px solid black;
+    padding: 15px;
+    margin: 5px;
+    font-size: 24px;
+    text-align: center;
+    width: 50px;
+}
+
+.itemBox:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.rightPanel {
+    border: 1px solid black;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.inputSection {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.inputSection input {
+    margin-right: 10px;
+    padding: 8px;
+    font-size: 16px;
+}
+
+.descriptionSection {
+    margin-top: 20px;
+    text-align: center;
 }
