@@ -1,6 +1,7 @@
 package com.draconias.plugins
 
 import com.draconias.algorithm.AlgorithmSelector
+import com.draconias.logger.LoggerInstance
 import com.draconias.websockets.WebSocketManager
 import com.draconias.websockets.WebSocketRequest
 import io.ktor.http.HttpMethod
@@ -15,12 +16,12 @@ import java.time.Duration
 
 fun Application.configureSockets() {
     install(WebSockets) {
-        pingPeriod = Duration.ofSeconds(15)
-        timeout = Duration.ofSeconds(15)
+        pingPeriod = Duration.ofSeconds(25)
+        timeout = Duration.ofSeconds(5)
         maxFrameSize = Long.MAX_VALUE
         masking = false
     }
-    install(CORS){
+    install(CORS) {
         allowHost("localhost:5173", listOf("http", "https"), listOf())
         allowMethod(HttpMethod.Get)
         allowHeader("Authorization")
@@ -32,8 +33,7 @@ fun Application.configureSockets() {
                 when (frame) {
                     is Text -> {
                         val receivedText = frame.readText()
-                        println("Received: $receivedText")
-
+                        LoggerInstance.getLogger().info("Received Package: $receivedText")
                         WebSocketManager.addSession(this)
                         val request = parseWebSocketRequest(receivedText)
                         AlgorithmSelector().selectAlgorithm(request)
@@ -44,6 +44,7 @@ fun Application.configureSockets() {
         }
     }
 }
+
 fun parseWebSocketRequest(jsonString: String): WebSocketRequest {
     val modifiedJson = jsonString.substring(1, jsonString.length - 1).replace("\\", "")
     return Json.decodeFromString<WebSocketRequest>(modifiedJson)

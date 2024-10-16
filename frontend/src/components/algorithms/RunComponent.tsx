@@ -47,10 +47,14 @@ function RunComponent(props: {
 
         for (let i = 0; i < currentStep; i++) {
             const step = takenSteps[i];
-            const [fromIndex, toIndex] = step.split(":").map(Number);
-            const temp = modifiedItems[fromIndex];
-            modifiedItems[fromIndex] = modifiedItems[toIndex];
-            modifiedItems[toIndex] = temp;
+            const numbers = step.split(";");
+            numbers.pop() //This is done because of the split there is at the last position '', which is not needed
+            for (let j = 0; j < numbers.length; j++) {
+                const [fromIndex, toIndex] = numbers[j].split(":").map(Number)
+                const temp = modifiedItems[fromIndex];
+                modifiedItems[fromIndex] = modifiedItems[toIndex];
+                modifiedItems[toIndex] = temp;
+            }
         }
         return modifiedItems;
     };

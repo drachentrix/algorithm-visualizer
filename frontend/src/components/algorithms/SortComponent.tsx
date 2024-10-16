@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Title, Tooltip } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
 import { useParams, useLocation } from "react-router-dom";
 import RunComponent from "./RunComponent";
 import descriptionData from "./descriptions.json";
@@ -26,6 +27,10 @@ function SortComponent() {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCurrentValue(Number(event.target.value));
     };
+
+    const generateAndAddToList = () => {
+        setItems(prevItems => [...prevItems, Math.floor(Math.random() * (1000 - 1 + 1))]);
+    }
 
     const removeItemFromList = (index: number) => {
         setItems(items.filter((_, ind) => index !== ind));
@@ -105,8 +110,9 @@ function SortComponent() {
                 <RunComponent id={id!} algorithmTypeId={"1"} items={items} setItems={setItems} />
 
                 <div className={styles.inputSection}>
-                    <input value={currentValue} type="number" onChange={handleChange} placeholder="Enter a value" />
+                    <input value={currentValue} type="number" onChange={handleChange} placeholder="Enter a value"/>
                     <button onClick={handleKeyDown}>Add item</button>
+                    <GiPerspectiveDiceSixFacesRandom onClick={generateAndAddToList} title={"Generate random number"} className={styles.randomButton}/>
                 </div>
 
                 <div className={styles.descriptionSection}>
