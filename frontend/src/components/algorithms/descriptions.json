@@ -1,4 +1,5 @@
 {
   "1": "Selection sort is a simple comparison-based sorting algorithm. It repeatedly finds the smallest (or largest) element from an unsorted portion of the list and swaps it with the first unsorted element.",
-  "2": "Bubble Sort repeatedly compares and swaps adjacent elements in a list, pushing the largest numbers to the end with each pass. It continues until the entire list is sorted."
+  "2": "Bubble Sort repeatedly compares and swaps adjacent elements in a list, pushing the largest numbers to the end with each pass. It continues until the entire list is sorted.",
+  "3": "Insertion sort is a simple sorting algorithm that works by iteratively inserting each element of an unsorted list into its correct position in a sorted portion of the list."
 }

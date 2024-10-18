@@ -16,7 +16,6 @@ import java.time.Duration
 
 fun Application.configureSockets() {
     install(WebSockets) {
-        pingPeriod = Duration.ofSeconds(25)
         timeout = Duration.ofSeconds(5)
         maxFrameSize = Long.MAX_VALUE
         masking = false

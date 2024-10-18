@@ -5,14 +5,14 @@ import io.ktor.websocket.*
 object WebSocketSessionContext {
     private val sessionIdHolder = ThreadLocal<WebSocketSession>()
 
-    var sessionId: WebSocketSession
+    var sessionId: WebSocketSession?
         get() = sessionIdHolder.get()
         set(sessionId) {
             sessionIdHolder.set(sessionId)
         }
 
-
-    fun clear() {
+    suspend fun clear() {
+        sessionId?.close()
         sessionIdHolder.remove()
     }
 }

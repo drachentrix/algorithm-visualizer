@@ -14,7 +14,6 @@ class BubbleSort: SortingAlgorithm {
                 }
             }
         }
-        WebSocketManager.sendMessageToSession("FINISHED")
     }
 
     private fun MutableList<Int>.swap(index1: Int, index2: Int) {

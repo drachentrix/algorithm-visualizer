@@ -15,7 +15,10 @@ class InsertionSort: SortingAlgorithm {
                 currentNumberIndex--
                 indexToCompare--
             }
-            WebSocketManager.sendMessageToSession(messageToSend)
+            if (!messageToSend.isEmpty()){
+                messageToSend = messageToSend.removeSuffix(";")
+                WebSocketManager.sendMessageToSession(messageToSend)
+            }
         }
     }
 

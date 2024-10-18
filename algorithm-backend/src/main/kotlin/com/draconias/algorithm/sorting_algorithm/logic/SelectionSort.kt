@@ -13,8 +13,6 @@ class SelectionSort : SortingAlgorithm {
                 WebSocketManager.sendMessageToSession("$lowestIndex:$i")
             }
         }
-        WebSocketManager.sendMessageToSession("FINISHED")
-
     }
 
     fun findLowest(items: List<Int>): Int {

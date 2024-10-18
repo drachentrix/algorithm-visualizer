@@ -12,7 +12,7 @@ function App() {
                     <div className="contentBody">
                         <SideBar/>
                         <Routes>
-                            <Route path="algorithm/Sortingalgorithms/:id" element={<SortComponent />} />
+                            <Route path="algorithm/Sortingalgorithms/:id" element={<SortComponent/>} />
                         </Routes>
                     </div>
                 </Router>
