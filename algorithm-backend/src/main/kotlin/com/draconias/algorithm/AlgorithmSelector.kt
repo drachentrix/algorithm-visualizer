@@ -12,7 +12,7 @@ class AlgorithmSelector {
         try{
             when(webSocketRequest.algorithmType.toInt()){
                 1 -> SortingAlgorithms.entries[webSocketRequest.id.toInt() - 1].algorithm.sort(webSocketRequest.items!!)
-                2 -> TreeTraversals.entries[webSocketRequest.id.toInt() - 1].treeTraversal.traverse(webSocketRequest.node!!)
+            //    2 -> TreeTraversals.entries[webSocketRequest.id.toInt() - 1].treeTraversal.traverse(webSocketRequest.node!!)
             }
         } catch (e: Exception){
             LoggerInstance.getLogger().error("There was a problem: $e")

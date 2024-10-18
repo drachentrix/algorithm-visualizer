@@ -8,5 +8,4 @@ data class WebSocketRequest(
     val id: String,
     val algorithmType: String,
     val items: MutableList<Int>?,
-    val node: Leave?
 )
