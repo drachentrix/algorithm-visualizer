@@ -9,7 +9,8 @@ function RunComponent(props: {
     id: string,
     algorithmTypeId: string,
     items: number[],
-    setItems: React.Dispatch<React.SetStateAction<number[]>>
+    setItems: React.Dispatch<React.SetStateAction<number[]>>,
+    message: any
 }) {
     const [isConnected, setIsConnected] = useState(false);
     const [maxStep, setMaxSteps] = useState<number>(0);
@@ -103,12 +104,11 @@ function RunComponent(props: {
             {isConnected && (
                 <WebSocketService
                     id={props.id}
-                    algorithmTypeId={props.algorithmTypeId}
                     addStep={addStep}
-                    items={props.items}
                     isConnected={isConnected}
                     onDisconnect={handleDisconnect}
                     incrementMaxStep={incrementMaxSteps}
+                    messageToSend={props.message}
                 />
             )}
         </>

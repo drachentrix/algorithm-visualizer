@@ -1,12 +1,33 @@
 package com.draconias.websockets
 
-import com.draconias.algorithm.tree_traversal.Leave
 import kotlinx.serialization.Serializable
 
+interface WsRequest {
+    val algorithmId: Int
+    val type: String
+}
+
 @Serializable
-data class WebSocketRequest(
-    val id: String,
-    val algorithmType: String,
-    val items: MutableList<Int>?,
-    val node: Leave?
-)
+data class SortingRequest(
+    val items: MutableList<Int>,
+    override val algorithmId: Int,
+    override val type: String
+): WsRequest
+
+@Serializable
+data class PathfindingRequest(
+    val graph: Graph,
+    val startNode: Int,
+    val endNode: Int,
+    override val algorithmId: Int,
+    override val type: String
+): WsRequest
+
+@Serializable
+data class Graph(val nodes: List<Node>, val connections: List<Connection>)
+
+@Serializable
+data class Node(val id: Int)
+
+@Serializable
+data class Connection(val from: Node, val to: Node, val weight: Int)

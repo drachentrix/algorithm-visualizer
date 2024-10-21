@@ -111,7 +111,7 @@ function SortComponent() {
             </div>
 
             <div className={styles.rightPanel}>
-                <RunComponent id={id!} algorithmTypeId={"1"} items={items} setItems={setItems} />
+                <RunComponent id={id!} algorithmTypeId={"1"} items={items} setItems={setItems} message={{items: items, algorithmId: id, type: "sorting"}} />
 
                 <div className={styles.inputSection}>
                     <input value={currentValue} type="number" onKeyDown={handleEnter} onChange={handleChange} placeholder="Enter a value" />

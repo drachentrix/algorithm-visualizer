@@ -2,8 +2,7 @@ package com.draconias.plugins
 
 import com.draconias.algorithm.AlgorithmSelector
 import com.draconias.logger.LoggerInstance
-import com.draconias.websockets.WebSocketManager
-import com.draconias.websockets.WebSocketRequest
+import com.draconias.websockets.*
 import io.ktor.http.HttpMethod
 import io.ktor.server.application.*
 import io.ktor.server.plugins.cors.routing.CORS
@@ -12,6 +11,8 @@ import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import io.ktor.websocket.Frame.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.time.Duration
 
 fun Application.configureSockets() {
@@ -27,7 +28,7 @@ fun Application.configureSockets() {
         allowHeader("Content-Type")
     }
     routing {
-        webSocket("/algorithm/sorting") {
+        webSocket("/algorithm") {
             for (frame in incoming) {
                 when (frame) {
                     is Text -> {
@@ -44,7 +45,15 @@ fun Application.configureSockets() {
     }
 }
 
-fun parseWebSocketRequest(jsonString: String): WebSocketRequest {
+fun parseWebSocketRequest(jsonString: String): WsRequest {
     val modifiedJson = jsonString.substring(1, jsonString.length - 1).replace("\\", "")
-    return Json.decodeFromString<WebSocketRequest>(modifiedJson)
+    val jsonElement = Json.parseToJsonElement(modifiedJson)
+    val jsonObject = jsonElement.jsonObject
+    val type = jsonObject["type"]?.jsonPrimitive?.content ?: throw IllegalArgumentException("Invalid request: 'type' field missing")
+
+    return when (type) {
+        "sorting" -> Json.decodeFromString<SortingRequest>(modifiedJson)
+        "pathfinding" -> Json.decodeFromString<PathfindingRequest>(modifiedJson)
+        else -> throw IllegalArgumentException("Unknown request type: $type")
+    }
 }
