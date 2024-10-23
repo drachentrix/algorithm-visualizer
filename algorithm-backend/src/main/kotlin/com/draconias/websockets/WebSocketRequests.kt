@@ -17,8 +17,8 @@ data class SortingRequest(
 @Serializable
 data class PathfindingRequest(
     val graph: Graph,
-    val startNode: Int,
-    val endNode: Int,
+    val startNode: Node,
+    val endNode: Node,
     override val algorithmId: Int,
     override val type: String
 ): WsRequest
