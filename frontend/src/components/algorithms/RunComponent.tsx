@@ -4,8 +4,7 @@ import React, {useEffect, useState} from "react";
 import {RiDeleteBin5Line} from "react-icons/ri";
 import WebSocketService from "../../websocket/WebSocketService.tsx";
 import styles from "./RunComponent.module.css";
-import {Simulate} from "react-dom/test-utils";
-import play = Simulate.play;
+
 
 function RunComponent(props: {
     id: string,
@@ -16,11 +15,14 @@ function RunComponent(props: {
 }) {
     const [isConnected, setIsConnected] = useState(false);
     const [maxStep, setMaxSteps] = useState<number>(0);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [takenSteps, setTakenSteps] = useState<String[]>([]);
     const [originalList, setOriginalList] = useState<number[]>([])
 
-    let playing = false
+    useEffect(() => {
+        props.setItems(applyStepsToList());
+    }, [currentStep]);
 
     const addStep = (item: String) => {
         if (item == "CLEAR;!") {
@@ -65,7 +67,7 @@ function RunComponent(props: {
 
     const incrementCurrentStep = (value: number) => {
         let newStep = currentStep + value;
-        if (0 <= newStep && newStep <= maxStep) {
+        if (0 <= newStep && newStep <= maxStep && newStep != currentStep) {
             setCurrentStep(newStep)
         }
         return undefined;
@@ -76,40 +78,27 @@ function RunComponent(props: {
         props.setItems([])
     }
 
-    useEffect(() => {
-        props.setItems(applyStepsToList());
-    }, [currentStep]);
-
-    const delay = ms => new Promise(
+    const delay = (ms: number | undefined) => new Promise(
         resolve => setTimeout(resolve, ms)
     );
 
-    const playAlgo = () => {
+    const playAlgo = async () => {
 
-        async function goTroughList() {
-                await delay(1000);
-                console.log("+1")
-                incrementCurrentStep(1)
-                goTroughListRec(0)
-            return undefined
-        }
-        async function goTroughListRec(number) {
-            if (number >=10){
-                playing = false
-                return undefined
+        async function goTroughListRec(step: number) {
+            if (step >= maxStep) {
+                setIsPlaying(false);
+                return;
             }
-            await delay(1000);
-            console.log("+1")
-            await incrementCurrentStep(1)
-            await goTroughListRec(number+1)
-            return undefined
+            await delay(800);
+            setCurrentStep(step + 1);
+            await goTroughListRec(step + 1);
         }
 
-
-        if (!playing) {
-            playing = true
-            goTroughList()
+        if (!isPlaying) {
+            setIsPlaying(true);
+            await goTroughListRec(currentStep);
         }
+
     }
 
 
