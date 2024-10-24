@@ -4,7 +4,6 @@ import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import SortComponent from "./components/algorithms/SortComponent.tsx";
 
 function App() {
-
     return (
         <>
             <div>
