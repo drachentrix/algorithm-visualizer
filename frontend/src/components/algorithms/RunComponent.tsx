@@ -11,7 +11,9 @@ function RunComponent(props: {
     algorithmTypeId: string,
     items: number[],
     setItems: React.Dispatch<React.SetStateAction<number[]>>,
-    message: any
+    message: any,
+    reset: boolean,
+    setReset: React.Dispatch<React.SetStateAction<boolean>>,
 }) {
     const [isConnected, setIsConnected] = useState(false);
     const [maxStep, setMaxSteps] = useState<number>(0);
@@ -24,6 +26,17 @@ function RunComponent(props: {
         props.setItems(applyStepsToList());
     }, [currentStep]);
 
+    useEffect(() => {
+        if (props.reset) {
+            setIsConnected(false)
+            setIsPlaying(false)
+            setMaxSteps(0)
+            setCurrentStep(0)
+            setTakenSteps([])
+            setOriginalList([])
+            props.setReset(false)
+        }
+    }, [props.reset]);
     const addStep = (item: String) => {
         if (item == "CLEAR;!") {
             setTakenSteps([])

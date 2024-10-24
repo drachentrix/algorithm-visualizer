@@ -11,11 +11,13 @@ import styles from "./SortComponent.module.css";
 function SortComponent() {
     const [currentValue, setCurrentValue] = useState<number>(0);
     const [items, setItems] = useState<number[]>([]);
+    const [shouldResetRun, setShouldResetRun] = useState<boolean>(false);
     const { id } = useParams();
     const location = useLocation();
 
     useEffect(() => {
         setItems([]);
+        setShouldResetRun(true);
     }, [location]);
 
     const handleKeyDown = () => {
@@ -111,7 +113,7 @@ function SortComponent() {
             </div>
 
             <div className={styles.rightPanel}>
-                <RunComponent id={id!} algorithmTypeId={"1"} items={items} setItems={setItems} message={{items: items, algorithmId: id, type: "sorting"}} />
+                <RunComponent id={id!} algorithmTypeId={"1"} items={items} setItems={setItems} message={{items: items, algorithmId: id, type: "sorting"}} reset={shouldResetRun} setReset={setShouldResetRun} />
 
                 <div className={styles.inputSection}>
                     <input value={currentValue} type="number" onKeyDown={handleEnter} onChange={handleChange} placeholder="Enter a value" />
