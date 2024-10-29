@@ -27,7 +27,10 @@ data class PathfindingRequest(
 data class Graph(val nodes: List<Node>, val connections: List<Connection>)
 
 @Serializable
-data class Node(val id: Int)
+data class Node(
+    val id: Int,
+    val distanceToStart: Int = 0
+)
 
 @Serializable
 data class Connection(val from: Node, val to: Node, val weight: Int)

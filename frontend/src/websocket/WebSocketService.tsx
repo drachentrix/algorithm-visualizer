@@ -5,7 +5,7 @@ function WebSocketService(props: {
     isConnected: boolean,
     onDisconnect: () => void,
     incrementMaxStep: () => void,
-    addStep: (item: String) => void,
+    addStep: (item: string) => void,
     messageToSend: any
 }) {
     let socket: WebSocket;

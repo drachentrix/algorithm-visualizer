@@ -5,8 +5,9 @@ import com.draconias.websockets.Graph
 import com.draconias.websockets.Node
 
 class Dijkstra: Pathfinder {
-    val visited: MutableList<Node> = mutableListOf()
+    private var unvisited: MutableList<Node> = mutableListOf()
+    
     override fun findPath(graph: Graph, startNode: Node, endNode: Node) {
-        TODO("Not yet implemented")
+        unvisited = graph.nodes.toMutableList()
     }
 }

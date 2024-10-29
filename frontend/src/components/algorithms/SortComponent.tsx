@@ -56,6 +56,25 @@ function SortComponent() {
         value: item,
     }));
 
+    const applyStepsToList = (originalList: number[], currentStep: number, takenSteps: string[]) => {
+        let modifiedItems = [...originalList];
+
+        if (currentStep === 0) {
+            return originalList;
+        }
+        for (let i = 0; i < currentStep; i++) {
+            const step = takenSteps[i];
+            const numbers = step.split(";");
+            for (let j = 0; j < numbers.length; j++) {
+                const [fromIndex, toIndex] = numbers[j].split(":").map(Number)
+                const temp = modifiedItems[fromIndex];
+                modifiedItems[fromIndex] = modifiedItems[toIndex];
+                modifiedItems[toIndex] = temp;
+            }
+        }
+        return modifiedItems;
+    };
+
     const description = descriptionData[id as keyof typeof descriptionData] || "No description available for this algorithm.";
 
     return (
@@ -111,7 +130,7 @@ function SortComponent() {
             </div>
 
             <div className={styles.rightPanel}>
-                <RunComponent id={id!} algorithmTypeId={"1"} items={items} setItems={setItems} message={{items: items, algorithmId: id, type: "sorting"}} />
+                <RunComponent<number[]> id={id!} items={items} setItems={setItems} message={{items: items, algorithmId: id, type: "sorting"}} applyStep={applyStepsToList} />
 
                 <div className={styles.inputSection}>
                     <input value={currentValue} type="number" onKeyDown={handleEnter} onChange={handleChange} placeholder="Enter a value" />
