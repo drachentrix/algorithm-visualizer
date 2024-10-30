@@ -12,7 +12,7 @@ function SideBar() {
                         {id: 3, value: "Insertion Sort"}
                     ]}/>
             <Header headerName={"Pathfinding algorithms"} algoOptions={[
-                {id: 1, value: "Dijkstra's"},
+                {id: 1, value: "Breadth First Search (BFS)"},
             ]}/>
         </div>
     )

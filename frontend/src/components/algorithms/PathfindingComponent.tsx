@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
 import styles from "./PathfindingComponent.module.css";
 import RunComponent from "./RunComponent.tsx";
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 interface GridCell {
     row: number;
@@ -15,14 +15,17 @@ interface GridCell {
 
 const PathfindingComponent: React.FC = () => {
     const [grid, setGrid] = useState<GridCell[][]>([]);
+    const [startNode, setStartNode] = useState<GridCell>();
+    const [rows, setRows] = useState(10)
+    const [cols, setCols] = useState(10)
+
     const { id } = useParams();
     const [contextMenu, setContextMenu] = useState<{
         visible: boolean; x: number; y: number; cell: GridCell | null; }>
-            ({ visible: false, x: 0, y: 0, cell: null });
-    const [currentAction, setCurrentAction] = useState<string>("start");
+    ({ visible: false, x: 0, y: 0, cell: null });
+
+    const currentActionRef = useRef<string>("start");
     const cellSize = 25;
-    const rows = 20;
-    const cols = 20;
 
     useEffect(() => {
         initializeGrid();
@@ -31,6 +34,11 @@ const PathfindingComponent: React.FC = () => {
     useEffect(() => {
         renderGrid(grid);
     }, [grid]);
+
+    const handleSet = (value: string) => {
+        currentActionRef.current = value;
+        setContextMenu({ ...contextMenu, visible: false });
+    };
 
     const initializeGrid = () => {
         const newGrid: GridCell[][] = Array.from({ length: rows }, (_, row) =>
@@ -87,13 +95,16 @@ const PathfindingComponent: React.FC = () => {
 
     const handleMouseDown = (event: React.MouseEvent, cell: GridCell) => {
         event.preventDefault();
-        if (event.button == 0){
+        const currentAction = currentActionRef.current;
+
+        if (event.button === 0) {
             if (currentAction === "remove") {
                 updateGrid(cell, { isStart: false, isEnd: false, isObstacle: false, isPath: false });
             } else if (currentAction === "wall") {
                 updateGrid(cell, { isStart: false, isEnd: false, isObstacle: true, isPath: false });
             } else if (currentAction === "start") {
                 replaceExistingCell("start", cell);
+                setStartNode(cell);
             } else if (currentAction === "end") {
                 replaceExistingCell("end", cell);
             }
@@ -111,7 +122,7 @@ const PathfindingComponent: React.FC = () => {
                 }
                 if (node.row === newCell.row && node.col === newCell.col) {
                     return type === "start" ? { ...node, isStart: true, isEnd: false, isObstacle: false, isPath: false }
-                        : { ...node, isStart: false, isEnd: true, isObstacle: false, isPath: false};
+                        : { ...node, isStart: false, isEnd: true, isObstacle: false, isPath: false };
                 }
                 return node;
             })
@@ -123,12 +134,6 @@ const PathfindingComponent: React.FC = () => {
         setContextMenu({ ...contextMenu, visible: false });
     };
 
-    const handleSet = (value: string) => {
-        setCurrentAction(value);
-        handleContextMenuClose()
-    };
-
-    // @ts-ignore
     const applyStepsToList = (originalList: GridCell[][], currentStep: number, takenSteps: string[]) => {
         let modifiedItems = [...originalList];
 
@@ -136,8 +141,13 @@ const PathfindingComponent: React.FC = () => {
             return originalList;
         }
 
+        for (let i = 0; i < currentStep; i++) {
+            let step = takenSteps[i].split(":")
+            modifiedItems[step[0] as unknown as number][step[1] as unknown as number].isPath = true;
+        }
         return modifiedItems;
-    }; //todo change
+    };
+
     const updateGrid = (cell: GridCell, properties: Partial<GridCell>) => {
         const updatedGrid = grid.map((row) =>
             row.map((node) =>
@@ -145,6 +155,13 @@ const PathfindingComponent: React.FC = () => {
             )
         );
         setGrid(updatedGrid);
+    };
+
+    const handleChangeR = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRows(Number(event.target.value));
+    };
+    const handleChangeC = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setCols(Number(event.target.value));
     };
 
     return (
@@ -179,7 +196,9 @@ const PathfindingComponent: React.FC = () => {
                     <button onClick={handleContextMenuClose} className={styles.closeButton}>Close</button>
                 </div>
             )}
-            <RunComponent<GridCell[][]> id={id!} items={grid} setItems={setGrid} message={{ items:grid, algorithmId: id, type: "sorting"}} applyStep={applyStepsToList} />
+            <RunComponent<GridCell[][]> id={id!} items={grid} setItems={setGrid} message={{ graph: grid, algorithmId: id, type: "pathfinder", startNode: startNode }} applyStep={applyStepsToList} />
+            <input value={rows} type="number" onChange={handleChangeR} placeholder="Enter a value"/>
+            <input value={cols} type="number" onChange={handleChangeC} placeholder="Enter a value"/>
         </div>
     );
 };

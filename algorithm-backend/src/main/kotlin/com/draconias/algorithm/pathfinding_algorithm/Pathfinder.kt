@@ -1,8 +1,7 @@
 package com.draconias.algorithm.pathfinding_algorithm
 
-import com.draconias.websockets.Graph
-import com.draconias.websockets.Node
+import com.draconias.websockets.GridCell
 
 interface Pathfinder {
-    fun findPath(graph: Graph, startNode: Node, endNode: Node)
+    suspend fun findPath(gridCell: List<List<GridCell>>, startNode: GridCell)
 }

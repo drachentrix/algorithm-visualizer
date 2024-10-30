@@ -16,21 +16,18 @@ data class SortingRequest(
 
 @Serializable
 data class PathfindingRequest(
-    val graph: Graph,
-    val startNode: Node,
-    val endNode: Node,
+    val graph: List<List<GridCell>>,
+    val startNode: GridCell,
     override val algorithmId: Int,
     override val type: String
 ): WsRequest
 
 @Serializable
-data class Graph(val nodes: List<Node>, val connections: List<Connection>)
-
-@Serializable
-data class Node(
-    val id: Int,
-    val distanceToStart: Int = 0
+data class GridCell(
+    val row: Int,
+    val col: Int,
+    val isStart: Boolean,
+    val isObstacle: Boolean,
+    val isEnd: Boolean,
+    val isPath: Boolean,
 )
-
-@Serializable
-data class Connection(val from: Node, val to: Node, val weight: Int)

@@ -26,9 +26,12 @@ function WebSocketService(props: {
         };
 
         socket.onmessage = (event) => {
-            props.incrementMaxStep()
-            props.addStep(event.data)
-            console.log("Received message:", event.data);
+            if (event.data) {
+                console.log("Received message:", event.data);
+                props.incrementMaxStep()
+                props.addStep(event.data)
+                socket.send(JSON.stringify("ACK"));
+            }
         };
 
         socket.onclose = () => {
