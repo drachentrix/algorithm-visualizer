@@ -1,9 +1,12 @@
 import {FaArrowLeftLong, FaArrowRight} from "react-icons/fa6";
 import {RxTriangleRight} from "react-icons/rx";
+import {IoIosPause} from "react-icons/io";
 import React, {useEffect, useState} from "react";
 import {RiDeleteBin5Line} from "react-icons/ri";
 import WebSocketService from "../../websocket/WebSocketService.tsx";
 import styles from "./RunComponent.module.css";
+import {Simulate} from "react-dom/test-utils";
+import {isPatternOrGradient} from "chart.js/helpers";
 
 
 function RunComponent(props: {
@@ -18,6 +21,7 @@ function RunComponent(props: {
     const [isConnected, setIsConnected] = useState(false);
     const [maxStep, setMaxSteps] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
+    const [isPaused, setIsPaused] = useState<boolean>(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [takenSteps, setTakenSteps] = useState<String[]>([]);
     const [originalList, setOriginalList] = useState<number[]>([])
@@ -96,13 +100,16 @@ function RunComponent(props: {
     );
 
     const playAlgo = async () => {
+        startAlgorithm() // Working but still no pause
 
         async function goTroughListRec(step: number) {
-            if (step >= maxStep) {
+            if (step >= maxStep || isPaused) {
                 setIsPlaying(false);
+                setIsPaused(false)
                 return;
             }
             await delay(800);
+            console.log(step + "  " + isPaused)
             setCurrentStep(step + 1);
             await goTroughListRec(step + 1);
         }
@@ -112,6 +119,14 @@ function RunComponent(props: {
             await goTroughListRec(currentStep);
         }
 
+    }
+
+
+
+    const undoPause= () =>{
+        console.log("PAUSED") //Not working dont know why
+        setIsPlaying(false)
+        setIsPaused(true)
     }
 
 
@@ -141,10 +156,13 @@ function RunComponent(props: {
                 </div>
 
                 <div className={styles.clearButton}>
-                    <RxTriangleRight
-                        onClick={playAlgo}
-                        title="Play the full Algo"
-                    />
+
+
+                    {isPlaying ?
+                        <IoIosPause onClick={undoPause}/> :
+                        <RxTriangleRight onClick={playAlgo}
+                        title="Play the full Steps"
+                    />}
                 </div>
             </div>
             {isConnected && (
