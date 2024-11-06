@@ -1,7 +1,7 @@
 import {FaArrowLeftLong, FaArrowRight} from "react-icons/fa6";
 import {RxTriangleRight} from "react-icons/rx";
 import {IoIosPause} from "react-icons/io";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {RiDeleteBin5Line} from "react-icons/ri";
 import WebSocketService from "../../websocket/WebSocketService.tsx";
 import styles from "./RunComponent.module.css";
@@ -21,10 +21,11 @@ function RunComponent(props: {
     const [isConnected, setIsConnected] = useState(false);
     const [maxStep, setMaxSteps] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [isPaused, setIsPaused] = useState<boolean>(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [takenSteps, setTakenSteps] = useState<String[]>([]);
     const [originalList, setOriginalList] = useState<number[]>([])
+
+    const currentIsPaused = useRef<boolean>(false);
 
     useEffect(() => {
         props.setItems(applyStepsToList());
@@ -100,16 +101,18 @@ function RunComponent(props: {
     );
 
     const playAlgo = async () => {
-        startAlgorithm() // Working but still no pause
+        if (takenSteps.length == 0 || currentStep == maxStep){
+            startAlgorithm() // Working but still no pause
+        }
 
         async function goTroughListRec(step: number) {
-            if (step >= maxStep || isPaused) {
+            if (step >= maxStep || currentIsPaused.current) {
                 setIsPlaying(false);
-                setIsPaused(false)
+                currentIsPaused.current = false
                 return;
             }
             await delay(800);
-            console.log(step + "  " + isPaused)
+            console.log(step + "  " + currentIsPaused.current)
             setCurrentStep(step + 1);
             await goTroughListRec(step + 1);
         }
@@ -126,7 +129,7 @@ function RunComponent(props: {
     const undoPause= () =>{
         console.log("PAUSED") //Not working dont know why
         setIsPlaying(false)
-        setIsPaused(true)
+        currentIsPaused.current = true
     }
 
 
