@@ -5,7 +5,6 @@ import SortComponent from "./components/algorithms/SortComponent.tsx";
 import PathfindingComponent from "./components/algorithms/PathfindingComponent.tsx";
 
 function App() {
-
     return (
         <>
             <div>

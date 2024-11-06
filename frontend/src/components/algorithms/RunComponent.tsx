@@ -1,9 +1,13 @@
 import { FaArrowLeftLong, FaArrowRight } from "react-icons/fa6";
 import { RxTriangleRight } from "react-icons/rx";
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import WebSocketService from "../../websocket/WebSocketService.tsx";
 import styles from "./RunComponent.module.css";
+import { IoReload } from "react-icons/io5";
+import {Simulate} from "react-dom/test-utils";
+import {isPatternOrGradient} from "chart.js/helpers";
+
 
 interface RunComponentProps<T> {
     id: string;
@@ -21,10 +25,12 @@ function RunComponent<T>({
                              message,
                          }: RunComponentProps<T>) {
     const [isConnected, setIsConnected] = useState(false);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [maxSteps, setMaxSteps] = useState(0);
     const [currentStep, setCurrentStep] = useState(0);
     const [takenSteps, setTakenSteps] = useState<string[]>([]);
     const [originalList, setOriginalList] = useState<T>(items);
+    const currentIsPaused = useRef<boolean>(false);
 
     const addStep = (item: string) => {
         if (item === "CLEAR;!") {
@@ -41,6 +47,7 @@ function RunComponent<T>({
         setOriginalList(items);
         setIsConnected(true);
     };
+
 
     const incrementCurrentStep = (value: number) => {
         let newStep = currentStep + value;
@@ -60,6 +67,40 @@ function RunComponent<T>({
     useEffect(() => {
         setItems(applyStep(originalList, currentStep, takenSteps));
     }, [currentStep]);
+    const delay = (ms: number | undefined) => new Promise(
+        resolve => setTimeout(resolve, ms)
+    );
+
+    const playAlgo = async () => {
+        if (takenSteps.length == 0 || currentStep == maxSteps){
+            startAlgorithm() // Working but still no pause
+        }
+
+        async function goTroughListRec(step: number) {
+            if (step >= maxSteps || currentIsPaused.current) {
+                setIsPlaying(false);
+                currentIsPaused.current = false
+                return;
+            }
+            await delay(800);
+            setCurrentStep(step + 1);
+            await goTroughListRec(step + 1);
+        }
+
+        if (!isPlaying) {
+            setIsPlaying(true);
+            await goTroughListRec(currentStep);
+        }
+
+    }
+
+
+
+    const undoPause= () =>{
+        setIsPlaying(false)
+        currentIsPaused.current = true
+    }
+
 
     return (
         <>
@@ -73,16 +114,24 @@ function RunComponent<T>({
                     onClick={() => incrementCurrentStep(1)}
                     title="Next Step"
                 />
-                <div className={styles.startButton}>
-                    <RxTriangleRight
-                        onClick={startAlgorithm}
-                        title="Start Algorithm"
-                    />
+
+                <div className={styles.clearButton}>
+                    {isPlaying ?
+                        <IoIosPause onClick={undoPause}/> :
+                        <RxTriangleRight onClick={playAlgo}
+                                         title="Autoplay"
+                        />}
                 </div>
                 <div className={styles.clearButton}>
                     <RiDeleteBin5Line
                         onClick={clearItems}
                         title="Clear items"
+                    />
+                </div>
+                <div className={styles.startButton}>
+                    <IoReload
+                        onClick={startAlgorithm}
+                        title="Reload Steps"
                     />
                 </div>
             </div>
