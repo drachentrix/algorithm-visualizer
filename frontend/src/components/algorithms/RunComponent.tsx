@@ -5,9 +5,7 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import WebSocketService from "../../websocket/WebSocketService.tsx";
 import styles from "./RunComponent.module.css";
 import { IoReload } from "react-icons/io5";
-import {Simulate} from "react-dom/test-utils";
-import {isPatternOrGradient} from "chart.js/helpers";
-
+import { IoIosPause } from "react-icons/io";
 
 interface RunComponentProps<T> {
     id: string;

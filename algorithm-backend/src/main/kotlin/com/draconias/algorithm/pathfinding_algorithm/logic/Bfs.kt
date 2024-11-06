@@ -39,7 +39,6 @@ class Bfs : Pathfinder {
                 if (!newCell.isObstacle && !visited.contains(newCell)) {
                     queue.add(newCell)
                     visited.add(newCell)
-                    delay(50)
                 }
             }
         }
