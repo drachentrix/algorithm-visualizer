@@ -8,7 +8,7 @@ enum class PathfindingAlgorithms(val pathfinder: Pathfinder){
 
     companion object{
         suspend fun selectPathfinder(request: PathfindingRequest){
-            entries[request.algorithmId - 1].pathfinder.findPath(request.graph, request.startNode)
+            entries[request.algorithmId - 1].pathfinder.findPath(request.graph, request.startNode, request.diagonalAllowed)
         }
     }
 }

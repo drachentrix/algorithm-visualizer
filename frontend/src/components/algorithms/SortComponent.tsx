@@ -18,6 +18,7 @@ function SortComponent() {
         setItems([]);
     }, [location]);
 
+
     const handleKeyDown = () => {
         setItems(prevItems => [...prevItems, currentValue]);
         setCurrentValue(0);
@@ -58,7 +59,6 @@ function SortComponent() {
 
     const applyStepsToList = (originalList: number[], currentStep: number, takenSteps: string[]) => {
         let modifiedItems = [...originalList];
-
         if (currentStep === 0) {
             return originalList;
         }

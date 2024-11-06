@@ -3,6 +3,7 @@ import * as d3 from "d3";
 import styles from "./PathfindingComponent.module.css";
 import RunComponent from "./RunComponent.tsx";
 import { useParams } from "react-router-dom";
+import { ResponsiveContainer } from "recharts";
 
 interface GridCell {
     row: number;
@@ -15,16 +16,17 @@ interface GridCell {
 
 const PathfindingComponent: React.FC = () => {
     const [grid, setGrid] = useState<GridCell[][]>([]);
-    const [startNode, setStartNode] = useState<GridCell>();
     const [rows, setRows] = useState(10)
     const [cols, setCols] = useState(10)
-
+    const [diagonalAllowed, setdiagonalAllowed] = useState<boolean>(false);
     const { id } = useParams();
+
     const [contextMenu, setContextMenu] = useState<{
         visible: boolean; x: number; y: number; cell: GridCell | null; }>
     ({ visible: false, x: 0, y: 0, cell: null });
 
     const currentActionRef = useRef<string>("start");
+    const startNode = useRef<GridCell>();
     const cellSize = 25;
 
     useEffect(() => {
@@ -34,6 +36,10 @@ const PathfindingComponent: React.FC = () => {
     useEffect(() => {
         renderGrid(grid);
     }, [grid]);
+
+    useEffect(() => {
+        initializeGrid()
+    }, [rows, cols]);
 
     const handleSet = (value: string) => {
         currentActionRef.current = value;
@@ -76,6 +82,7 @@ const PathfindingComponent: React.FC = () => {
     };
 
     const getCellColor = (cell: GridCell) => {
+        if (cell.isEnd && cell.isPath) return "blue"
         if (cell.isStart) return "green";
         if (cell.isEnd) return "red";
         if (cell.isObstacle) return "black";
@@ -104,7 +111,7 @@ const PathfindingComponent: React.FC = () => {
                 updateGrid(cell, { isStart: false, isEnd: false, isObstacle: true, isPath: false });
             } else if (currentAction === "start") {
                 replaceExistingCell("start", cell);
-                setStartNode(cell);
+                startNode.current = cell;
             } else if (currentAction === "end") {
                 replaceExistingCell("end", cell);
             }
@@ -135,8 +142,9 @@ const PathfindingComponent: React.FC = () => {
     };
 
     const applyStepsToList = (originalList: GridCell[][], currentStep: number, takenSteps: string[]) => {
-        let modifiedItems = [...originalList];
-
+        let modifiedItems = originalList.map(row =>
+            row.map(cell => ({ ...cell, isPath: false }))
+        );
         if (currentStep === 0) {
             return originalList;
         }
@@ -164,43 +172,106 @@ const PathfindingComponent: React.FC = () => {
         setCols(Number(event.target.value));
     };
 
+    const toggleDiagonalAllowed = () => {
+        setdiagonalAllowed(prev => !prev);
+    };
+
     return (
-        <div className={styles.baseGrid}>
-            <svg id="grid-svg" width={cols * cellSize} height={rows * cellSize}></svg>
-            {contextMenu.visible && (
-                <div
-                    className={styles.contextMenu}
-                    style={{
-                        top: contextMenu.y,
-                        left: contextMenu.x,
+        <ResponsiveContainer width="100%" height={450}>
+            <div className={styles.baseGrid}>
+                <svg id="grid-svg" width={cols * cellSize} height={rows * cellSize}></svg>
+                {contextMenu.visible && (
+                    <div
+                        className={styles.contextMenuContainer}
+                        style={{
+                            top: contextMenu.y,
+                            left: contextMenu.x,
+                        }}
+                    >
+                        <ul className={styles.contextMenuList}>
+                            <li onClick={() => handleSet("start")} className={styles.contextMenuItemStart}>
+                                <div style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    backgroundColor: "green",
+                                    marginRight: "10px"
+                                }}></div>
+                                Select Start
+                            </li>
+                            <li onClick={() => handleSet("end")} className={styles.contextMenuItemEnd}>
+                                <div style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    backgroundColor: "red",
+                                    marginRight: "10px"
+                                }}></div>
+                                Select End
+                            </li>
+                            <li onClick={() => handleSet("wall")} className={styles.contextMenuItemWall}>
+                                <div style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    backgroundColor: "black",
+                                    marginRight: "10px"
+                                }}></div>
+                                Select Wall/Obstacle
+                            </li>
+                            <li onClick={() => handleSet("remove")} className={styles.contextMenuItemRemove}>
+                                <div style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    backgroundColor: "lightgray",
+                                    marginRight: "10px"
+                                }}></div>
+                                Select Field Remover
+                            </li>
+                        </ul>
+                        <button onClick={handleContextMenuClose} className={styles.contextMenuCloseButton}>Close
+                        </button>
+                    </div>
+                )}
+                <RunComponent<GridCell[][]>
+                    id={id!}
+                    items={grid}
+                    setItems={setGrid}
+                    message={{
+                        graph: grid,
+                        algorithmId: id,
+                        type: "pathfinder",
+                        startNode: startNode.current,
+                        diagonalAllowed: diagonalAllowed
                     }}
-                >
-                    <ul>
-                        <li onClick={() => handleSet("start")} className={styles.start}>
-                            <div style={{ width: "20px", height: "20px", backgroundColor: "green", marginRight: "10px" }}></div>
-                            Select Start
-                        </li>
-                        <li onClick={() => handleSet("end")} className={styles.end}>
-                            <div style={{ width: "20px", height: "20px", backgroundColor: "red", marginRight: "10px" }}></div>
-                            Select End
-                        </li>
-                        <li onClick={() => handleSet("wall")} className={styles.wall}>
-                            <div style={{ width: "20px", height: "20px", backgroundColor: "black", marginRight: "10px" }}></div>
-                            Select Wall/Obstacle
-                        </li>
-                        <li onClick={() => handleSet("remove")} className={styles.remove}>
-                            <div style={{ width: "20px", height: "20px", backgroundColor: "lightgray", marginRight: "10px" }}></div>
-                            Select Field Remover
-                        </li>
-                    </ul>
-                    <button onClick={handleContextMenuClose} className={styles.closeButton}>Close</button>
+                    applyStep={applyStepsToList}
+                />
+                <input
+                    value={rows}
+                    type="number"
+                    onChange={handleChangeR}
+                    placeholder="Enter a value"
+                    className={styles.inputRow}
+                />
+                <input
+                    value={cols}
+                    type="number"
+                    onChange={handleChangeC}
+                    placeholder="Enter a value"
+                    className={styles.inputCol}
+                />
+                <div className={styles.sliderButtonContainer}>
+                    <label>Diagonal allowed</label>
+                    <div
+                        className={`${styles.toggleContainer} ${diagonalAllowed ? styles.active : ""}`}
+                        onClick={toggleDiagonalAllowed}>
+                        <div className={styles.toggleButton}></div>
+                    </div>
                 </div>
-            )}
-            <RunComponent<GridCell[][]> id={id!} items={grid} setItems={setGrid} message={{ graph: grid, algorithmId: id, type: "pathfinder", startNode: startNode }} applyStep={applyStepsToList} />
-            <input value={rows} type="number" onChange={handleChangeR} placeholder="Enter a value"/>
-            <input value={cols} type="number" onChange={handleChangeC} placeholder="Enter a value"/>
-        </div>
+
+
+            </div>
+        </ResponsiveContainer>
+
     );
+
 };
 
 export default PathfindingComponent;

@@ -1,7 +1,6 @@
 package com.draconias.plugins
 
 import com.draconias.algorithm.AlgorithmSelector
-import com.draconias.logger.LoggerInstance
 import com.draconias.websockets.*
 import io.ktor.http.HttpMethod
 import io.ktor.server.application.*
@@ -14,12 +13,15 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.Duration
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.withLock
 
 fun Application.configureSockets() {
     install(WebSockets) {
-        timeout = Duration.ofSeconds(5)
         maxFrameSize = Long.MAX_VALUE
         masking = false
+        pingPeriod = Duration.ofSeconds(10)
     }
     install(CORS) {
         allowHost("localhost:5173", listOf("http", "https"), listOf())
@@ -29,16 +31,25 @@ fun Application.configureSockets() {
     }
     routing {
         webSocket("/algorithm") {
-            for (frame in incoming) {
+            incoming.consumeEach { frame ->
                 when (frame) {
                     is Text -> {
-                        val receivedText = frame.readText()
-                        LoggerInstance.getLogger().info("Received Package: $receivedText")
                         WebSocketManager.addSession(this)
-                        val request = parseWebSocketRequest(receivedText)
-                        AlgorithmSelector().selectAlgorithm(request)
+                        val receivedText = frame.readText()
+                        if (receivedText == "\"ACK\"") {
+                            WebSocketManager.ackCount.incrementAndGet()
+                        } else {
+                            val request = parseWebSocketRequest(receivedText)
+                            AlgorithmSelector().selectAlgorithm(request)
+                        }
                     }
                     else -> {}
+                }
+
+                WebSocketManager.mutex.withLock {
+                    if (WebSocketManager.ackCount.get() >= WebSocketManager.messageCount.get()) {
+                        WebSocketManager.removeSession()
+                    }
                 }
             }
         }
@@ -53,7 +64,7 @@ fun parseWebSocketRequest(jsonString: String): WsRequest {
 
     return when (type) {
         "sorting" -> Json.decodeFromString<SortingRequest>(modifiedJson)
-        "pathfinding" -> Json.decodeFromString<PathfindingRequest>(modifiedJson)
+        "pathfinder" -> Json.decodeFromString<PathfindingRequest>(modifiedJson)
         else -> throw IllegalArgumentException("Unknown request type: $type")
     }
 }

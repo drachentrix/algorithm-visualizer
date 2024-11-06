@@ -29,6 +29,8 @@ function RunComponent<T>({
     const addStep = (item: string) => {
         if (item === "CLEAR;!") {
             setTakenSteps([]);
+            setMaxSteps(0)
+            setCurrentStep(0)
         } else {
             setTakenSteps((prev) => [...prev, item]);
         }
@@ -48,8 +50,11 @@ function RunComponent<T>({
     };
 
     const clearItems = () => {
-        setOriginalList({} as T);
-        setItems({} as T);
+        setOriginalList([] as T);
+        setCurrentStep(0);
+        setMaxSteps(0);
+        setTakenSteps([])
+        setItems([] as T);
     };
 
     useEffect(() => {
@@ -87,7 +92,9 @@ function RunComponent<T>({
                     addStep={addStep}
                     isConnected={isConnected}
                     onDisconnect={() => setIsConnected(false)}
-                    incrementMaxStep={() => setMaxSteps((prev) => prev + 1)}
+                    incrementMaxStep={() => {
+                        setMaxSteps((prev) => prev + 1)
+                    }}
                     messageToSend={message}
                 />
             )}

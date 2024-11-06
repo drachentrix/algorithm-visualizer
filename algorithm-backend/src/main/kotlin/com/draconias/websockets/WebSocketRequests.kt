@@ -11,7 +11,7 @@ interface WsRequest {
 data class SortingRequest(
     val items: MutableList<Int>,
     override val algorithmId: Int,
-    override val type: String
+    override val type: String,
 ): WsRequest
 
 @Serializable
@@ -19,7 +19,8 @@ data class PathfindingRequest(
     val graph: List<List<GridCell>>,
     val startNode: GridCell,
     override val algorithmId: Int,
-    override val type: String
+    override val type: String,
+    val diagonalAllowed: Boolean
 ): WsRequest
 
 @Serializable

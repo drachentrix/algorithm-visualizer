@@ -14,12 +14,11 @@ class AlgorithmSelector {
         try{
             when (request.type) {
                 "sorting" -> SortingAlgorithms.selectSort(request as SortingRequest)
-                "pathfinding" -> PathfindingAlgorithms.selectPathfinder(request as PathfindingRequest)
+                "pathfinder" -> PathfindingAlgorithms.selectPathfinder(request as PathfindingRequest)
                 else -> throw IllegalArgumentException("Unknown algorithm type")
             }
         } catch (e: Exception){
             LoggerInstance.getLogger().error("There was a problem: $e")
         }
-        WebSocketManager.removeSession()
     }
 }
