@@ -5,6 +5,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {RiDeleteBin5Line} from "react-icons/ri";
 import WebSocketService from "../../websocket/WebSocketService.tsx";
 import styles from "./RunComponent.module.css";
+import { IoReload } from "react-icons/io5";
 import {Simulate} from "react-dom/test-utils";
 import {isPatternOrGradient} from "chart.js/helpers";
 
@@ -135,6 +136,7 @@ function RunComponent(props: {
 
     return (
         <>
+
             <div className={styles.progressBar}>
                 <FaArrowLeftLong
                     onClick={() => incrementCurrentStep(-1)}
@@ -145,27 +147,26 @@ function RunComponent(props: {
                     onClick={() => incrementCurrentStep(1)}
                     title="Next Step"
                 />
-                <div className={styles.startButton}>
-                    <RxTriangleRight
-                        onClick={startAlgorithm}
-                        title="Start Algorithm"
-                    />
+
+                <div className={styles.clearButton}>
+                    {isPlaying ?
+                        <IoIosPause onClick={undoPause}/> :
+                        <RxTriangleRight onClick={playAlgo}
+                                         title="Autoplay"
+                        />}
                 </div>
+
                 <div className={styles.clearButton}>
                     <RiDeleteBin5Line
                         onClick={clearItems}
                         title="Clear items"
                     />
                 </div>
-
-                <div className={styles.clearButton}>
-
-
-                    {isPlaying ?
-                        <IoIosPause onClick={undoPause}/> :
-                        <RxTriangleRight onClick={playAlgo}
-                        title="Play the full Steps"
-                    />}
+                <div className={styles.startButton}>
+                    <IoReload
+                        onClick={startAlgorithm}
+                        title="Reload Steps"
+                    />
                 </div>
             </div>
             {isConnected && (
