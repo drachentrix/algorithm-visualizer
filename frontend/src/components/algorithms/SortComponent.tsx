@@ -143,7 +143,6 @@ function SortComponent() {
                                 let fillColor = "rgba(75, 192, 192, 0.8)"; // Default color (no swap)
 
                                 if (highlightedIndices.beforeSwap.includes(index)) {
-                                    console.log(highlightedIndices.beforeSwap)
                                     if (highlightedIndices.beforeSwap[0] == index){
                                         fillColor = "rgba(255, 99, 132, 0.8)"; // Before-swap color
 
