@@ -1,9 +1,7 @@
 package com.draconias.plugins
 
 import com.draconias.algorithm.AlgorithmSelector
-import com.draconias.logger.LoggerInstance
-import com.draconias.websockets.WebSocketManager
-import com.draconias.websockets.WebSocketRequest
+import com.draconias.websockets.*
 import io.ktor.http.HttpMethod
 import io.ktor.server.application.*
 import io.ktor.server.plugins.cors.routing.CORS
@@ -12,13 +10,17 @@ import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import io.ktor.websocket.Frame.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.time.Duration
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.sync.withLock
 
 fun Application.configureSockets() {
     install(WebSockets) {
-        timeout = Duration.ofSeconds(5)
         maxFrameSize = Long.MAX_VALUE
         masking = false
+        pingPeriod = Duration.ofSeconds(10)
     }
     install(CORS) {
         allowHost("localhost:5173", listOf("http", "https"), listOf())
@@ -27,24 +29,46 @@ fun Application.configureSockets() {
         allowHeader("Content-Type")
     }
     routing {
-        webSocket("/algorithm/sorting") {
-            for (frame in incoming) {
+        webSocket("/algorithm") {
+            incoming.consumeEach { frame ->
                 when (frame) {
                     is Text -> {
-                        val receivedText = frame.readText()
-                        LoggerInstance.getLogger().info("Received Package: $receivedText")
                         WebSocketManager.addSession(this)
-                        val request = parseWebSocketRequest(receivedText)
-                        AlgorithmSelector().selectAlgorithm(request)
+                        val receivedText = frame.readText()
+                        if (receivedText == "\"ACK\"") {
+                            WebSocketManager.ackCount.incrementAndGet()
+                            WebSocketManager.sendMessageToSession()
+                        } else if (receivedText.isEmpty()){
+                            WebSocketManager.removeSession()
+                        }
+                        else {
+                            val request = parseWebSocketRequest(receivedText)
+                            AlgorithmSelector().selectAlgorithm(request)
+                            WebSocketManager.sendMessageToSession()
+
+                        }
                     }
                     else -> {}
+                }
+                WebSocketManager.mutex.withLock {
+                    if (WebSocketManager.ackCount.get() >= WebSocketManager.messageCount.get()) {
+                        WebSocketManager.removeSession()
+                    }
                 }
             }
         }
     }
 }
 
-fun parseWebSocketRequest(jsonString: String): WebSocketRequest {
+fun parseWebSocketRequest(jsonString: String): WsRequest {
     val modifiedJson = jsonString.substring(1, jsonString.length - 1).replace("\\", "")
-    return Json.decodeFromString<WebSocketRequest>(modifiedJson)
+    val jsonElement = Json.parseToJsonElement(modifiedJson)
+    val jsonObject = jsonElement.jsonObject
+    val type = jsonObject["type"]?.jsonPrimitive?.content ?: throw IllegalArgumentException("Invalid request: 'type' field missing")
+
+    return when (type) {
+        "sorting" -> Json.decodeFromString<SortingRequest>(modifiedJson)
+        "pathfinder" -> Json.decodeFromString<PathfindingRequest>(modifiedJson)
+        else -> throw IllegalArgumentException("Unknown request type: $type")
+    }
 }
