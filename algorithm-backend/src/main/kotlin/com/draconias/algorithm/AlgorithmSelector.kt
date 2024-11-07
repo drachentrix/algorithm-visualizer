@@ -1,8 +1,10 @@
 package com.draconias.algorithm
 
+import com.draconias.algorithm.backtracking.BackTrackingProblems
 import com.draconias.algorithm.pathfinding_algorithm.PathfindingAlgorithms
 import com.draconias.algorithm.sorting_algorithm.SortingAlgorithms
 import com.draconias.logger.LoggerInstance
+import com.draconias.websockets.BackTrackingRequest
 import com.draconias.websockets.PathfindingRequest
 import com.draconias.websockets.SortingRequest
 import com.draconias.websockets.WsRequest
@@ -14,6 +16,7 @@ class AlgorithmSelector {
             when (request.type) {
                 "sorting" -> SortingAlgorithms.selectSort(request as SortingRequest)
                 "pathfinder" -> PathfindingAlgorithms.selectPathfinder(request as PathfindingRequest)
+                "backtracking" -> BackTrackingProblems.selectBackTrack(request as BackTrackingRequest)
                 else -> throw IllegalArgumentException("Unknown algorithm type")
             }
         } catch (e: Exception){

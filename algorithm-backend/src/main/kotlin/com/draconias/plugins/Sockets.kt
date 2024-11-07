@@ -67,6 +67,7 @@ fun parseWebSocketRequest(jsonString: String): WsRequest {
     return when (type) {
         "sorting" -> Json.decodeFromString<SortingRequest>(modifiedJson)
         "pathfinder" -> Json.decodeFromString<PathfindingRequest>(modifiedJson)
+        "backtracking" -> Json.decodeFromString<BackTrackingRequest>(modifiedJson)
         else -> throw IllegalArgumentException("Unknown request type: $type")
     }
 }

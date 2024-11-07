@@ -15,6 +15,14 @@ data class SortingRequest(
 ): WsRequest
 
 @Serializable
+data class BackTrackingRequest(
+    val graph: List<List<BackTrackGridCell>>,
+    val startNode: GridCell,
+    override val algorithmId: Int,
+    override val type: String,
+): WsRequest
+
+@Serializable
 data class PathfindingRequest(
     val graph: List<List<GridCell>>,
     val startNode: GridCell,
@@ -22,6 +30,15 @@ data class PathfindingRequest(
     override val type: String,
     val diagonalAllowed: Boolean
 ): WsRequest
+
+@Serializable
+data class BackTrackGridCell(
+    val row: Int,
+    val col: Int,
+    val isStart: Boolean,
+    val isObstacle: Boolean,
+    val isVisited: Boolean
+)
 
 @Serializable
 data class GridCell(
