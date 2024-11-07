@@ -17,7 +17,7 @@ class InsertionSort: SortingAlgorithm {
             }
             if (messageToSend.isNotEmpty()){
                 messageToSend = messageToSend.removeSuffix(";")
-                WebSocketManager.sendMessageToSession(messageToSend)
+                WebSocketManager.addToBuffer(messageToSend)
             }
         }
     }

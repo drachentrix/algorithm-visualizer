@@ -5,7 +5,6 @@ import com.draconias.algorithm.sorting_algorithm.SortingAlgorithms
 import com.draconias.logger.LoggerInstance
 import com.draconias.websockets.PathfindingRequest
 import com.draconias.websockets.SortingRequest
-import com.draconias.websockets.WebSocketManager
 import com.draconias.websockets.WsRequest
 
 class AlgorithmSelector {

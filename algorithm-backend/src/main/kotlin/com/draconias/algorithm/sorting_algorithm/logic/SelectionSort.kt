@@ -10,7 +10,7 @@ class SelectionSort : SortingAlgorithm {
             val lowestIndex = findLowest(items.subList(i, items.size)) + i
             if (i != lowestIndex) {
                 items.swap(i, lowestIndex)
-                WebSocketManager.sendMessageToSession("$lowestIndex:$i")
+                WebSocketManager.addToBuffer("$lowestIndex:$i")
             }
         }
     }

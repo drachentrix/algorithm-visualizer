@@ -13,6 +13,7 @@ interface RunComponentProps<T> {
     setItems: React.Dispatch<React.SetStateAction<T>>;
     applyStep: (item: T, currentStep: number, takenSteps: string[]) => T;
     message: any;
+    clearItems?: (items: T) => T
 }
 
 function RunComponent<T>({
@@ -60,6 +61,7 @@ function RunComponent<T>({
         setMaxSteps(0);
         setTakenSteps([])
         setItems([] as T);
+        clearItems()
     };
 
     useEffect(() => {

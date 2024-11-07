@@ -11,14 +11,15 @@ interface GridCell {
     isStart: boolean;
     isEnd: boolean;
     isObstacle: boolean;
+    isVisited: boolean;
     isPath: boolean;
 }
 
 const PathfindingComponent: React.FC = () => {
     const [grid, setGrid] = useState<GridCell[][]>([]);
-    const [rows, setRows] = useState(10)
-    const [cols, setCols] = useState(10)
-    const [diagonalAllowed, setdiagonalAllowed] = useState<boolean>(false);
+    const [rows, setRows] = useState(10);
+    const [cols, setCols] = useState(10);
+    const [diagonalAllowed, setDiagonalAllowed] = useState<boolean>(false);
     const { id } = useParams();
 
     const [contextMenu, setContextMenu] = useState<{
@@ -34,11 +35,15 @@ const PathfindingComponent: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        renderGrid(grid);
+        if (grid.length === 0) {
+            initializeGrid();
+        } else {
+            renderGrid(grid);
+        }
     }, [grid]);
 
     useEffect(() => {
-        initializeGrid()
+        initializeGrid();
     }, [rows, cols]);
 
     const handleSet = (value: string) => {
@@ -54,7 +59,8 @@ const PathfindingComponent: React.FC = () => {
                 isStart: false,
                 isEnd: false,
                 isObstacle: false,
-                isPath: false,
+                isVisited: false,
+                isPath: false
             }))
         );
         setGrid(newGrid);
@@ -82,22 +88,23 @@ const PathfindingComponent: React.FC = () => {
     };
 
     const getCellColor = (cell: GridCell) => {
-        if (cell.isEnd && cell.isPath) return "blue"
+        if (cell.isEnd && cell.isVisited) return "blue";
         if (cell.isStart) return "green";
         if (cell.isEnd) return "red";
         if (cell.isObstacle) return "black";
-        if (cell.isPath) return "yellow";
+        if (cell.isPath) return "violet";
+        if (cell.isVisited) return "yellow";
         return "white";
     };
 
     const handleCellClick = (cell: GridCell, event: React.MouseEvent) => {
         event.preventDefault();
-
-        const svg = document.getElementById("grid-svg");
-        if (svg) {
-            const { left, top } = svg.getBoundingClientRect();
-            setContextMenu({visible: true, x: event.clientX - left, y: event.clientY - top, cell: cell});
-        }
+        setContextMenu({
+            visible: true,
+            x: event.clientX,
+            y: event.clientY,
+            cell: cell,
+        });
     };
 
     const handleMouseDown = (event: React.MouseEvent, cell: GridCell) => {
@@ -106,11 +113,12 @@ const PathfindingComponent: React.FC = () => {
 
         if (event.button === 0) {
             if (currentAction === "remove") {
-                updateGrid(cell, { isStart: false, isEnd: false, isObstacle: false, isPath: false });
+                updateGrid(cell, { isStart: false, isEnd: false, isObstacle: false, isVisited: false, isPath: false });
             } else if (currentAction === "wall") {
-                updateGrid(cell, { isStart: false, isEnd: false, isObstacle: true, isPath: false });
+                updateGrid(cell, { isStart: false, isEnd: false, isObstacle: true, isVisited: false, isPath: false });
             } else if (currentAction === "start") {
                 replaceExistingCell("start", cell);
+                cell.isStart = true;
                 startNode.current = cell;
             } else if (currentAction === "end") {
                 replaceExistingCell("end", cell);
@@ -122,14 +130,14 @@ const PathfindingComponent: React.FC = () => {
         const updatedGrid = grid.map((row) =>
             row.map((node) => {
                 if (type === "start" && node.isStart) {
-                    return { ...node, isStart: false, isEnd: false, isObstacle: false, isPath: false };
+                    return { ...node, isStart: false, isEnd: false, isObstacle: false, isPath: false, isVisited: false };
                 }
                 if (type === "end" && node.isEnd) {
-                    return { ...node, isStart: false, isEnd: false, isObstacle: false, isPath: false };
+                    return { ...node, isStart: false, isEnd: false, isObstacle: false, isPath: false, isVisited: false };
                 }
                 if (node.row === newCell.row && node.col === newCell.col) {
-                    return type === "start" ? { ...node, isStart: true, isEnd: false, isObstacle: false, isPath: false }
-                        : { ...node, isStart: false, isEnd: true, isObstacle: false, isPath: false };
+                    return type === "start" ? { ...node, isStart: true, isEnd: false, isObstacle: false, isPath: false, isVisited: false }
+                        : { ...node, isStart: false, isEnd: true, isObstacle: false, isPath: false, isVisited: false };
                 }
                 return node;
             })
@@ -143,17 +151,30 @@ const PathfindingComponent: React.FC = () => {
 
     const applyStepsToList = (originalList: GridCell[][], currentStep: number, takenSteps: string[]) => {
         let modifiedItems = originalList.map(row =>
-            row.map(cell => ({ ...cell, isPath: false }))
+            row.map(cell => ({ ...cell, isVisited: false, isPath: false }))
         );
         if (currentStep === 0) {
             return originalList;
         }
 
         for (let i = 0; i < currentStep; i++) {
-            let step = takenSteps[i].split(":")
-            modifiedItems[step[0] as unknown as number][step[1] as unknown as number].isPath = true;
+            if (takenSteps[i].startsWith("P")) {
+                modifiedItems = clearPath(modifiedItems)
+                modifiedItems = applyFinalPath(modifiedItems, takenSteps[i].substring(1));
+            } else {
+                let step = takenSteps[i].split(":");
+                modifiedItems[+step[0]][+step[1]].isVisited = true;
+            }
         }
         return modifiedItems;
+    };
+
+    const applyFinalPath = (grid: GridCell[][], step: string): GridCell[][] => {
+        for (let singlePathTile of step.split(";")) {
+            let [row, col] = singlePathTile.split(":").map(Number);
+            grid[row][col].isPath = true;
+        }
+        return grid;
     };
 
     const updateGrid = (cell: GridCell, properties: Partial<GridCell>) => {
@@ -165,6 +186,12 @@ const PathfindingComponent: React.FC = () => {
         setGrid(updatedGrid);
     };
 
+    const clearPath = (items: GridCell[][]): GridCell[][] => {
+        return items.map(row =>
+            row.map(cell => ({ ...cell, isVisited: false }))
+        );
+    };
+
     const handleChangeR = (event: React.ChangeEvent<HTMLInputElement>) => {
         setRows(Number(event.target.value));
     };
@@ -173,7 +200,7 @@ const PathfindingComponent: React.FC = () => {
     };
 
     const toggleDiagonalAllowed = () => {
-        setdiagonalAllowed(prev => !prev);
+        setDiagonalAllowed(prev => !prev);
     };
 
     return (
@@ -190,44 +217,23 @@ const PathfindingComponent: React.FC = () => {
                     >
                         <ul className={styles.contextMenuList}>
                             <li onClick={() => handleSet("start")} className={styles.contextMenuItemStart}>
-                                <div style={{
-                                    width: "20px",
-                                    height: "20px",
-                                    backgroundColor: "green",
-                                    marginRight: "10px"
-                                }}></div>
+                                <div style={{ width: "20px", height: "20px", backgroundColor: "green", marginRight: "10px" }}></div>
                                 Select Start
                             </li>
                             <li onClick={() => handleSet("end")} className={styles.contextMenuItemEnd}>
-                                <div style={{
-                                    width: "20px",
-                                    height: "20px",
-                                    backgroundColor: "red",
-                                    marginRight: "10px"
-                                }}></div>
+                                <div style={{ width: "20px", height: "20px", backgroundColor: "red", marginRight: "10px" }}></div>
                                 Select End
                             </li>
                             <li onClick={() => handleSet("wall")} className={styles.contextMenuItemWall}>
-                                <div style={{
-                                    width: "20px",
-                                    height: "20px",
-                                    backgroundColor: "black",
-                                    marginRight: "10px"
-                                }}></div>
+                                <div style={{ width: "20px", height: "20px", backgroundColor: "black", marginRight: "10px" }}></div>
                                 Select Wall/Obstacle
                             </li>
                             <li onClick={() => handleSet("remove")} className={styles.contextMenuItemRemove}>
-                                <div style={{
-                                    width: "20px",
-                                    height: "20px",
-                                    backgroundColor: "lightgray",
-                                    marginRight: "10px"
-                                }}></div>
+                                <div style={{ width: "20px", height: "20px", backgroundColor: "lightgray", marginRight: "10px" }}></div>
                                 Select Field Remover
                             </li>
                         </ul>
-                        <button onClick={handleContextMenuClose} className={styles.contextMenuCloseButton}>Close
-                        </button>
+                        <button onClick={handleContextMenuClose} className={styles.contextMenuCloseButton}>Close</button>
                     </div>
                 )}
                 <RunComponent<GridCell[][]>
@@ -241,6 +247,7 @@ const PathfindingComponent: React.FC = () => {
                         startNode: startNode.current,
                         diagonalAllowed: diagonalAllowed
                     }}
+                    clearItems={clearPath}
                     applyStep={applyStepsToList}
                 />
                 <input
@@ -266,12 +273,31 @@ const PathfindingComponent: React.FC = () => {
                     </div>
                 </div>
 
-
+                <div className={styles.legendContainer}>
+                    <div className={styles.legendItem}>
+                        <div className={styles.legendColorBox} style={{ backgroundColor: "green" }}></div>
+                        Start Node
+                    </div>
+                    <div className={styles.legendItem}>
+                        <div className={styles.legendColorBox} style={{ backgroundColor: "red" }}></div>
+                        End Node
+                    </div>
+                    <div className={styles.legendItem}>
+                        <div className={styles.legendColorBox} style={{ backgroundColor: "black" }}></div>
+                        Obstacle/Wall
+                    </div>
+                    <div className={styles.legendItem}>
+                        <div className={styles.legendColorBox} style={{ backgroundColor: "yellow" }}></div>
+                        Visited Cell
+                    </div>
+                    <div className={styles.legendItem}>
+                        <div className={styles.legendColorBox} style={{ backgroundColor: "violet" }}></div>
+                        Path Cell
+                    </div>
+                </div>
             </div>
         </ResponsiveContainer>
-
     );
-
 };
 
 export default PathfindingComponent;
