@@ -73,6 +73,7 @@ function RunComponent<T>({
         if (takenSteps.length == 0 || currentStep == maxSteps){
             startAlgorithm() // Working but still no pause
         }
+        console.log("InPlayAlgo")
 
         async function goTroughListRec(step: number) {
             if (step >= maxSteps || currentIsPaused.current) {
@@ -91,7 +92,6 @@ function RunComponent<T>({
         }
 
     }
-
 
 
     const undoPause= () =>{
