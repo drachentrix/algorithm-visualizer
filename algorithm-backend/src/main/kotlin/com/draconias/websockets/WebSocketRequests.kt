@@ -31,4 +31,5 @@ data class GridCell(
     val isObstacle: Boolean,
     val isEnd: Boolean,
     val isPath: Boolean,
+    val isVisited: Boolean
 )

@@ -10,7 +10,7 @@ class BubbleSort: SortingAlgorithm {
             for (idx2 in 0 until items.size- idx-1){
                 if (items[idx2] > items[idx2+1]){
                     items.swap(idx2, idx2+1)
-                    WebSocketManager.sendMessageToSession("$idx2:${idx2+1}")
+                    WebSocketManager.addToBuffer("$idx2:${idx2+1}")
                 }
             }
         }

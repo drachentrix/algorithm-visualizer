@@ -14,7 +14,6 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.Duration
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.withLock
 
 fun Application.configureSockets() {
@@ -38,14 +37,17 @@ fun Application.configureSockets() {
                         val receivedText = frame.readText()
                         if (receivedText == "\"ACK\"") {
                             WebSocketManager.ackCount.incrementAndGet()
-                        } else {
+                            WebSocketManager.sendMessageToSession()
+                        }
+                        else {
                             val request = parseWebSocketRequest(receivedText)
                             AlgorithmSelector().selectAlgorithm(request)
+                            WebSocketManager.sendMessageToSession()
+
                         }
                     }
                     else -> {}
                 }
-
                 WebSocketManager.mutex.withLock {
                     if (WebSocketManager.ackCount.get() >= WebSocketManager.messageCount.get()) {
                         WebSocketManager.removeSession()

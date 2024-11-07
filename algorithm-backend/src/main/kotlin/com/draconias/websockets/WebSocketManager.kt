@@ -9,12 +9,22 @@ object WebSocketManager {
     val messageCount = AtomicInteger(0)
     val ackCount = AtomicInteger(0)
     val mutex = Mutex()
+    private val messageBuffer: MutableList<String> = mutableListOf()
 
     fun addSession(session: WebSocketSession) {
         WebSocketSessionContext.sessionId = session
     }
 
-    suspend fun sendMessageToSession(message: String) {
+    fun addToBuffer(message: String){
+        messageBuffer.add(message)
+    }
+
+    suspend fun sendMessageToSession() {
+        if (messageBuffer.size == 0){
+            return
+        }
+        val message = messageBuffer[0]
+        messageBuffer.removeAt(0)
         LoggerInstance.getLogger().info("Send Message to client: $message")
         WebSocketSessionContext.sessionId?.send(Frame.Text(message))
         messageCount.incrementAndGet()

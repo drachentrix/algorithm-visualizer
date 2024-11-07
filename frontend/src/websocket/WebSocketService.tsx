@@ -1,4 +1,5 @@
 import {useEffect} from "react";
+import { debounce } from "lodash";
 
 function WebSocketService(props: {
     id: string,
@@ -13,7 +14,6 @@ function WebSocketService(props: {
     const sendMessage = (message: string) => {
         if (socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify(message));
-            console.log("Sent message:", message);
         }
     }
     const connect = () => {
@@ -25,14 +25,14 @@ function WebSocketService(props: {
             sendMessage(message)
         };
 
-        socket.onmessage = (event) => {
+        socket.onmessage = debounce((event) => {
             if (event.data) {
                 console.log("Received message:", event.data);
-                props.incrementMaxStep()
-                props.addStep(event.data)
-                socket.send(JSON.stringify("ACK"));
+                props.incrementMaxStep();
+                props.addStep(event.data);
+                sendMessage("ACK");
             }
-        };
+        }, 100);
 
         socket.onclose = () => {
             console.log("Disconnected from WebSocket");
