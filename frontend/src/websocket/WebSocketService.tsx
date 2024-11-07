@@ -2,12 +2,11 @@ import {useEffect} from "react";
 
 function WebSocketService(props: {
     id: string,
-    algorithmTypeId: string,
     isConnected: boolean,
     onDisconnect: () => void,
     incrementMaxStep: () => void,
-    items: number[],
-    addStep: (item: String) => void
+    addStep: (item: string) => void,
+    messageToSend: any
 }) {
     let socket: WebSocket;
 
@@ -22,14 +21,17 @@ function WebSocketService(props: {
         socket.onopen = () => {
             console.log("Connected to WebSocket");
             props.addStep("CLEAR;!")
-            const message = JSON.stringify({id: props.id, algorithmType: props.algorithmTypeId, items: props.items});
+            const message = JSON.stringify(props.messageToSend);
             sendMessage(message)
         };
 
         socket.onmessage = (event) => {
-            props.incrementMaxStep()
-            props.addStep(event.data)
-            console.log("Received message:", event.data);
+            if (event.data) {
+                console.log("Received message:", event.data);
+                props.incrementMaxStep()
+                props.addStep(event.data)
+                socket.send(JSON.stringify("ACK"));
+            }
         };
 
         socket.onclose = () => {
@@ -52,10 +54,10 @@ function WebSocketService(props: {
 
     useEffect(() => {
         if (props.isConnected) {
-            socket = new WebSocket("ws://localhost:8080/algorithm/sorting"); //todo Later change to dynamic link for the different types
+            socket = new WebSocket("ws://localhost:8080/algorithm"); //todo Later change to dynamic link for the different types
             connect()
         }
-    }, [props.isConnected, props.id, props.algorithmTypeId]);
+    }, [props.isConnected, props.id]);
 
     return null;
 }
