@@ -12,23 +12,28 @@ function SortComponent() {
     const [currentValue, setCurrentValue] = useState<number>(0);
     const [items, setItems] = useState<number[]>([]);
     const [previousItems, setPreviousItems] = useState<number[]>([]);
-    const [swappedIndices, setSwappedIndices] = useState<{ swapped: number[]; displaced: number[] }>({ swapped: [], displaced: [] });
+    const [highlightedIndices, setHighlightedIndices] = useState<{ beforeSwap: number[]; afterSwap: number[] }>({
+        beforeSwap: [],
+        afterSwap: []
+    });
     const { id } = useParams();
     const location = useLocation();
 
     useEffect(() => {
-        setItems([]);
+        setItems([]); // Reset items when location changes
     }, [location]);
 
-    // Update swapped and displaced items whenever items change
     useEffect(() => {
-        const { swapped, displaced } = findSwaps(previousItems, items);
-        setSwappedIndices({ swapped, displaced });
-        setPreviousItems(items); // Update previous items to the current state
+        // Check for swaps and set highlight for transitions
+        const { beforeSwap, afterSwap } = findSwaps(previousItems, items);
+        setHighlightedIndices({ beforeSwap, afterSwap });
+
+        setPreviousItems(items); // Update previousItems to the latest state
+
     }, [items]);
 
     const handleKeyDown = () => {
-        setItems(prevItems => [...prevItems, currentValue]);
+        setItems((prevItems) => [...prevItems, currentValue]);
         setCurrentValue(0);
     };
 
@@ -46,14 +51,14 @@ function SortComponent() {
     };
 
     const generateAndAddToList = () => {
-        setItems(prevItems => [...prevItems, Math.floor(Math.random() * (500 - 1 + 1))]);
+        setItems((prevItems) => [...prevItems, Math.floor(Math.random() * (500 - 1 + 1))]);
     };
 
     const removeItemFromList = (index: number) => {
         setItems(items.filter((_, ind) => index !== ind));
     };
 
-    const handleEnter = (pressed: { key: string; }) => {
+    const handleEnter = (pressed: { key: string }) => {
         if (pressed.key === "Enter") {
             handleKeyDown();
         }
@@ -61,7 +66,7 @@ function SortComponent() {
 
     const data = items.map((item, index) => ({
         index: `${index + 1}`,
-        value: item,
+        value: item
     }));
 
     const applyStepsToList = (originalList: number[], currentStep: number, takenSteps: string[]) => {
@@ -75,6 +80,8 @@ function SortComponent() {
             for (let j = 0; j < numbers.length; j++) {
                 const [fromIndex, toIndex] = numbers[j].split(":").map(Number);
                 const temp = modifiedItems[fromIndex];
+
+
                 modifiedItems[fromIndex] = modifiedItems[toIndex];
                 modifiedItems[toIndex] = temp;
             }
@@ -82,26 +89,24 @@ function SortComponent() {
         return modifiedItems;
     };
 
-    const findSwaps = (previous, now) => {
-        const swapped = [];
-        const displaced = [];
+    const findSwaps = (previous: number[], now: number[]) => {
+        const beforeSwap = [];
+        const afterSwap = [];
 
         const maxLength = Math.max(previous.length, now.length);
 
         for (let i = 0; i < maxLength; i++) {
             if (previous[i] !== now[i]) {
-                // Check if previous value moved to a new position
-                if (previous.includes(now[i]) && !swapped.includes(i)) {
-                    swapped.push(i);
+                if (!beforeSwap.includes(i) && previous.includes(now[i])) {
+                    beforeSwap.push(i); // Original position of the moved item
                 }
-                // Check if value in previous was displaced by swap
-                if (now.includes(previous[i]) && !displaced.includes(i)) {
-                    displaced.push(i);
+                if (!afterSwap.includes(i) && now.includes(previous[i])) {
+                    afterSwap.push(i); // New position of the moved item
                 }
             }
         }
 
-        return { swapped, displaced };
+        return { beforeSwap, afterSwap };
     };
 
     const description = descriptionData[id as keyof typeof descriptionData] || "No description available for this algorithm.";
@@ -131,19 +136,23 @@ function SortComponent() {
                                 padding: "10px"
                             }}
                             itemStyle={{ color: "#fff" }}
-                            cursor={{ fill: 'rgba(75, 192, 192, 0.2)' }}
+                            cursor={{ fill: "rgba(75, 192, 192, 0.2)" }}
                         />
                         <Bar dataKey="value">
                             {data.map((entry, index) => {
-                                let fillColor = "rgba(75, 192, 192, 0.8)"; // Default color
-                                if (swappedIndices.swapped.includes(index)) {
-                                    fillColor = "rgba(54, 162, 235, 0.8)"; // Swapped color
-                                } else if (swappedIndices.displaced.includes(index)) {
-                                    fillColor = "rgba(255, 99, 132, 0.8)"; // Displaced color
+                                let fillColor = "rgba(75, 192, 192, 0.8)"; // Default color (no swap)
+
+                                if (highlightedIndices.beforeSwap.includes(index)) {
+                                    console.log(highlightedIndices.beforeSwap)
+                                    if (highlightedIndices.beforeSwap[0] == index){
+                                        fillColor = "rgba(255, 99, 132, 0.8)"; // Before-swap color
+
+                                    }else{
+                                        fillColor = "rgba(54, 162, 235, 0.8)"; // After-swap color
+                                    }
                                 }
-                                return (
-                                    <Cell key={`cell-${index}`} fill={fillColor} />
-                                );
+
+                                return <Cell key={`cell-${index}`} fill={fillColor} />;
                             })}
                         </Bar>
                     </BarChart>
@@ -179,24 +188,6 @@ function SortComponent() {
                     <h3>Description</h3>
                     <p>{description}</p>
                 </div>
-
-                {swappedIndices.swapped.length > 0 && (
-                    <div className={styles.differenceSection}>
-                        <h4>Changed Items:</h4>
-                        <ul>
-                            {swappedIndices.swapped.map((index) => (
-                                <li key={index}>
-                                    Swapped Index {index}: Previous - {previousItems[index] ?? "N/A"}, Now - {items[index] ?? "N/A"}
-                                </li>
-                            ))}
-                            {swappedIndices.displaced.map((index) => (
-                                <li key={index}>
-                                    Displaced Index {index}: Previous - {previousItems[index] ?? "N/A"}, Now - {items[index] ?? "N/A"}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
             </div>
         </div>
     );

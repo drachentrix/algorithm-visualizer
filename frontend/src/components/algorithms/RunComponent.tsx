@@ -81,7 +81,7 @@ function RunComponent<T>({
                 currentIsPaused.current = false
                 return;
             }
-            await delay(800);
+            await delay(1500);
             setCurrentStep(step + 1);
             await goTroughListRec(step + 1);
         }
