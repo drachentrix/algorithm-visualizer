@@ -38,8 +38,6 @@ fun Application.configureSockets() {
                         if (receivedText == "\"ACK\"") {
                             WebSocketManager.ackCount.incrementAndGet()
                             WebSocketManager.sendMessageToSession()
-                        } else if (receivedText.isEmpty()){
-                            WebSocketManager.removeSession()
                         }
                         else {
                             val request = parseWebSocketRequest(receivedText)

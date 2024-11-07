@@ -9,10 +9,11 @@ function SideBar() {
                     algoOptions={[
                         {id: 1, value: "Selection Sort"},
                         {id: 2, value: "Bubble Sort"},
-                        {id: 3, value: "Insertion Sort"}
+                        {id: 3, value: "Insertion Sort"},
                     ]}/>
             <Header headerName={"Pathfinding algorithms"} algoOptions={[
                 {id: 1, value: "Breadth First Search (BFS)"},
+                {id: 2, value: "AStar (A*)"}
             ]}/>
         </div>
     )

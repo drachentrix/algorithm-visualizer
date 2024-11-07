@@ -188,7 +188,7 @@ const PathfindingComponent: React.FC = () => {
 
     const clearPath = (items: GridCell[][]): GridCell[][] => {
         return items.map(row =>
-            row.map(cell => ({ ...cell, isVisited: false }))
+            row.map(cell => ({ ...cell, isVisited: false, isPath: false }))
         );
     };
 
